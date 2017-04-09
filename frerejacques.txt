@@ -1,0 +1,23 @@
+O kazoo \$C6 # bar-based notation
+|  CDEC / * / EF G / * / G"A GF E C / * / C<G C  / *
+
+O  piano \$C6 # phrase-based notation
+|  [CDEC]* [EF G]* [G"A GF E C]* [C<G C]*
+
+O  flute \$C6 # add dynamics alteration
+|  :[CD_EC]* :[EF G]* [!G"A GF _E _C]* ![C<G C  / C<G C0]
+
+O  flute \$C6 # add chords
+|  :[CD_EC]* :[EF G]* [!G"A GF _E _C]* ![C<G C  / C<G C0]
+<   [CM]*     [Em.]*  [Dm.     CM.]*    [CM. CM / CM  C.M]
+
+O  vox \$C5 # add lyrics 
+|  [C  ,D  ,E   ,C    ]* [E       ,F   ;G    ]*
+>  [Frè,re ,Ja  ,cques]* [dor     ,mez ;vous?]*
+>  [Are,you,slee,ping?]* [Bro     ,ther;John ]*
+>  [Bru,der,Ja  ,kob  ]* [Schläfst,du  ;noch?]*
+
+|  [G" ,A   ;G    ,F  ;E   ;C   ]* [C   ,<G  ;C   ]*
+>  [So ,nnez;les  ,ma ;ti  ;nes ]* [Ding,Dang;Dong]*
+>  [Mor,ning;bells,are;ring;ing ]* [Ding,Dang;Dong]*
+>  [Hörst,du;nicht,die;Gloc;ken?]* [Ding,Dang;Dong]*
