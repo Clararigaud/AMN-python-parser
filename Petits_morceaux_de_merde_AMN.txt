@@ -1,0 +1,24 @@
+#title= Les lapins sont en vacances
+
+O piano \$B4:C\%120:4\
+| [.Ce,.Ce ,.Df,.Df] [.Eg,.Eg ,_Eg] [.Df,.Df ,.Eg,.Eg] [.Fa,.Fa ,_Fa] [.>%Gb,.Fa ,.Eg] [.Eg,.Df ,.Ce] [.Eg,.Df,.Ce,.Ce] [.Bd,.Bd, _C]
+=\$G3:C\%4\
+: [C >G] [C] [D A] [D] [>G G] [AB C] [G C] [G C]
+
+#------------------------------------------------------------------------------------------------------------------------------------
+#title= Boogie
+#Et est-ce que c'est comme en musique quand il y a des dièses et des bémol? Cad que le dièses s'applique sur toute la mesure? 
+O piano \$C5\%120:4\
+| [+DE GG +DE GG] [+DE CC @'] [+GA >C>C +GA >C>C] [GF EC @'] [B+D BG A>C AF] [+DE CC @']
+= \$C4\ 
+: [Cg Cg Cg CG] [Cg Cg -BG >C] [>%Fc >%Fc >%Fc >%Fc] [Cg Cg -BG >C] [>%Gd >%Gd >%Fc >%Fc] [Cg Cg -BG >C]
+#est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+#title= La ballade à Billy
+#comment je fais la liaison entre le quatrième et le troisième C?
+O piano \$D5\%120:4\
+| [C>D ->EC >DC AG] [+FD FD EC C] [<CD EF GA BC] [AG +FG G'] [>-ED CA C C] [>-G>F>-E C C'] [GA CA >DC AG] [+FD FE EC C]
+= \$C4\ 
+:[C' E'] [D G C'] [C' E'] [D' G'] [C' E'] [F' +F'] [G' A'] [D G C']  

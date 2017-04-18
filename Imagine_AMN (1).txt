@@ -1,0 +1,13 @@
+#title=Imagine
+#music author=John Lennon
+#lyrics author=John Lennon
+
+o global \72%:4\ #tempo de 72 bat/ min, 4 temps par mesure
+= veR1=[>%Cfa*3,Fa-Bb] veR2=[D_3|eg*3,Deg] veL3=[(<CC)*4] veL2=[(<FC)*4  ] chR1=[(>%CfF)*2,(>%CfE)*2] chR2=[( D>%CfaD , C>%CfaC] chR3=[BG>%(DbG)*2>CeG] chR4=[%Gdf   ] 
+= chL=[<F <E ] chL=[<D <C ] chL=[G   ] #ver=> verse right hand / vel => verse left hand/ chr => chorus right hand etc...
+
+o piano \$C4:C\ ?%\ 
+| [Eg-3,Egb.%] [D_3|eg*3,Deg] [>%Cfa*3,Fa-Bb] [D_3|eg*3,Deg] [>%Cfa*3,Fa-Bb] [D_3|eg*3,Deg][>%Cfa*3,Fa-Bb] [D_3|eg*3,Deg]
+< [(>%CfF)*2,(>%CfE)*2] [( D>%CfaD , C>%CfaC] [BG>%(DbG)*2>CeG] [%Gdf]
+: [(<CC)*4][(<FC)*4][(<CC)*4][(<FC)*4][(<CC)*4][(<FC)*4][(<CC)*4][(<FC)*4][(<CC)*4][(<FC)*4][(<CC)*4][(<FC)*4]
+< [<F <E ] [<D <C ] [<F <E ] [<D <C ]
