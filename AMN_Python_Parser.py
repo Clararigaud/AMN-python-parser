@@ -1,79 +1,5 @@
-#merged grammar from "testParser.py"
-#added Alterations
-# PERFS voice et global ->>> OK
-# gestion Infoline vsc comment ---->>> OOOOKKKK splited the two parse mechanisms, first loop in order to detect infos and suppress star of line comments
-
 from pyparsing import *
 import sys
-FJ = r"""
-# AMN = 1.0
-# title = Frère Jacques
-# ceci est un commentaire
-O kazoo \$C6 # bar-based notation
-|  CDEC /*/ EF G / * / G"A GF E C / * / C<G C  / *
-
-O  piano \$C6 # phrase-based notation
-|  [CDEC]* [EF G]* [G"A GF E C]* [C<G C]*
-
-O  flute \$C6 # add dynamics alteration
-|  :[CD_EC]* :[EF G]* [!G"A GF _E _C]* ![C<G C  / C<G C0]
-
-O  flute \$C6 # add chords
-|  :[CD_EC]* :[EF G]* [!G"A GF _E _C]* ![C<G C  / C<G C0]
-<   [CM]*     [Em.]*  [Dm.     CM.]*    [CM. CM / CM  C.M]
-
-O  vox \$C5 # add lyrics 
-|  [C  ,D  ,E   ,C    ]* [E       ,F   ;G    ]*
->  [Frè,re ,Ja  ,cques]* [dor     ,mez ;vous?]*
->  [Are,you,slee,ping?]* [Bro     ,ther;John ]*
->  [Bru,der,Ja  ,kob  ]* [Schläfst,du  ;noch?]*
-
-|  [G" ,A   ;G    ,F  ;E   ;C   ]* [C   ,<G  ;C   ]*
->  [So ,nnez;les  ,ma ;ti  ;nes ]* [Ding,Dang;Dong]*
->  [Mor,ning;bells,are;ring;ing ]* [Ding,Dang;Dong]*
->  [Hörst,du;nicht,die;Gloc;ken?]* [Ding,Dang;Dong]*"""
-
-Imagine = r"""
-
-#title = Imagine
-#super comment
-# music author = John Lennon
-#lyrics author=John Lennon
-#file author = Clara Sorita
-
-O global \%72:4\ #tempo de 72 bat/ min, 4 temps par mesure
-= veR1=[>%Cfa*3,Fa-Bb] veR2=[D_3|eg*3,Deg] veL3=[(<CC)*4] veL2=[(<FC)*4  ] chR1=[(>%CfF)*2,(>%CfE)*2] chR2=[( D>%CfaD , C>%CfaC] chR3=[BG>%(DbG)*2>CeG] chR4=[%Gdf   ] 
-= chL=[<F <E ] chL=[<D <C ] chL=[G   ] #ver=> verse right hand / vel => verse left hand/ chr => chorus right hand etc...
-
-O piano \$C4:C\?%\ 
-| [Eg-3,Egb.%] veR2 (veR1 veR2)*4 chR1 chR2 chR3 chR4
-| (veL1 veL2)*6 chL"""
-
-
-infosong = r"""
-# this is a comment
-#title = Supersong # this is a comment
-#this is a comment between two infos and it works !
-# music author = Clara #this is a comment
-#this is a comment
-#AMN = 1.0
-
-O global \$C4:C\%72:4\?%\?%            #wahoo
-= toBeContinued #todo
-= toBeContinued #todo
-
-# there's still work to do
-O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
-= toBeContinued
-| /!/C>D*EC /*******/EF\>\ G /*59
-: /CGEC/
-
-O phrasebasednotation
-| /ABC 
-"""
-
-# le caractère antislash fait des conflits (car c'est le char qui permet d'echapper dans les strings python)
-#donc il faut bien mettre un "r" pour "raw" avant
 
 class AMNFileParser(object):
     def __init__(self,AMNFile):
@@ -86,21 +12,14 @@ class AMNFileParser(object):
         self.__musicauthor = None
         self.__lyricsauthor = None
         self.__fileauthor = None
-        self.__Global = None
-        self.__Voices = {}
         parsed = self.parseFile()
         
-        for info in parsed["infos"] :
-            setattr(self,info["keyWord"].replace(" ", ""),info["value"]) #Makes it an attribute
-     
-        for voice in parsed["voices"]:
-            if voice["name"] == "global":
-                self.__Global = voice
-            elif voice["name"] in self.__Voices.keys() :
-                self.__Voices[voice["name"]]+=[voice]
-            else :
-                self.__Voices[voice["name"]]=[voice]
-            
+        for info in parsed["infos"]:
+            #Makes it an attribute
+            setattr(self,info["keyWord"].replace(" ", ""),info["value"])
+        self.__Voices = parsed["voices"]
+        self.__Global = parsed["global"]
+        
     def __str__(self):
         s = """\n--------FILE INFOS------------
 AMN version: {0.AMN}
@@ -115,13 +34,27 @@ Nb Voices:{0.nbVoices}""".format(self)
         if self.__Global:
             s+="""
 Global : 
-    Perfs: {0.Global[perfs]}
-    Datas : {0.Global[lines]}
-    """.format(self)
+    Perfs: {0.perfs}
+    Datas : {0.lines}
 
-        for instru in self.__Voices.items():
-            s+= "\n"+instru[0]
+Voices :""".format(self.__Global)
             
+        for voice in self.__Voices:
+            s+= """
+
+    Instru : {0.name}
+    at line : {0.fileLine}
+    local perfs : {0.perfs}
+""".format(voice)
+            for line in voice.lines:
+                s+= """
+    Line type : %s"""%(line.type)
+                if line.content != '':
+                    s+= """
+bars:"""
+                    for bar in line.content:
+                        s+="\n ->  CRN:{0.barcontent}, Bar Repetition : {0.barRep}, Bar Alteration : {0.barAlt}".format(bar)
+       
         return s
     
     def parseFile(self):
@@ -133,14 +66,22 @@ Global :
         INT = Word(nums)
         PATTERN = Optional(oneOf(":  ")) + INT 
         SBEAT = Word(nums)
-        CBEAT = Suppress(Literal('[')) + (PATTERN | (Literal('/')+PATTERN) | (Literal(' ')+PATTERN) ) + Suppress(Literal(']'))
-        BSIG= (Suppress(Literal('%')) + Optional(BPM| dynamicBPM) + Optional(Literal(':') + (SBEAT | CBEAT)))
+        CBEAT = (Suppress(Literal('['))
+                 + (PATTERN | (Literal('/')+PATTERN) | (Literal(' ')+PATTERN))
+                 + Suppress(Literal(']'))
+                 )
+        BSIG= (Suppress(Literal('%'))
+               + Optional(BPM| dynamicBPM)
+               + Optional(Literal(':')
+                          + (SBEAT | CBEAT))
+               )
 
         #SSIG a l'air OK
         Octave = oneOf('<< < > >>')|Word(srange("[0-9]"),exact=1)
         Pitch = Word(srange('[A-G]'),exact=1)
         Sign = oneOf('+ -')
-        Key = Optional(Sign) + (Word(srange("[A-G]"),exact=1)("MAJOR") | Word(srange("[a-g]"),exact=1)("MINOR"))
+        Key = Optional(Sign) + (Word(srange("[A-G]"),exact=1)("MAJOR")
+                                | Word(srange("[a-g]"),exact=1)("MINOR"))
         Fifth = '0' | Sign + Word(srange("[1-7]"),exact=1)
         Degree = Word(alphas)
         SSCALE = Key | Fifth
@@ -153,21 +94,25 @@ Global :
         EOS = MPN("MPN") | IPN("IPN")
         Step = Tone + (Freq | Raise) + Lower + Raise + Degree
         CSCALE = Literal('[') + Step + Literal('$]')
-        SSIG = (Suppress(Literal('$')) + EOS("EOS") + Optional(Literal(':') + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE"))
+        SSIG = Group(Suppress(Literal('$'))
+                + EOS("EOS")
+                + Optional(Literal(':')
+                           + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE")
+                )
 
-        ### PERFS #Refaire ça, difficile à utiliser tel quel, moche, puis des trucs faux genre N signifit "entier" ici
         GlobalVoicePerf = oneOf('% $ ! !! !!! !N ? ?? ??? ?N !% ?% ?~! !~? ?~~! !~~? @~= =~@ @~~= =~~@ =') # non
         BarOrnaments = oneOf('| :| |: :|: 1 2 N $ @ >$ <$ <@ >@')# non
         NoteOrnaments = (Suppress("\\")
                          +oneOf('< > << >> + - +- -+ ++ -- =+ =- =+=- =-=+ +=* =-* DGAG DG* =~~++ =~~+ =~~-- =~~- =~~+* =~~-* =~~!! =~~! =~~?? =~~? =~~!* =~~?*')
                          +Suppress("\\")
                          )
-        ChorsOrnaments = oneOf('-+ +- -~+ +~- -~~+ +~~-')
+        ChordsOrnaments = oneOf('-+ +- -~+ +~- -~~+ +~~-')
 
+        #ECN = Chords Notations CCN and ECN to be done
         PERFS = Suppress("\\") +(
-            Optional(SSIG+Suppress(Optional("\\")))("SSIG") 
+            Optional(SSIG.setResultsName("SSIG") +Suppress(Optional("\\")))
                  + Optional(BSIG+Suppress(Optional("\\")))("BSIG")
-                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\")))("perfs")
+                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\")))("voiceperfs")
                  ).setWhitespaceChars("") # ordre classique clé/tempo/ "décorateurs"
         
         #ALTERATIONS
@@ -179,55 +124,55 @@ Global :
 
         repetition = "*" + Optional(OneOrMore("*") | Word(nums))
         #Compact Rythm Notation
-
-        Note = Group(
-                (Optional(Alteration)("ALT")
-                + Pitch
+        ToneRepetition = Literal("\"") | Literal("'") |OneOrMore(Word(nums))
+        
+        Note = ((Optional(Alteration)("ALT")
+                + (Pitch |Literal("@"))("note")
                 + Optional(NoteOrnaments)
-                |"@")
-                 + Optional(OneOrMore("\" '")|OneOrMore(Word(nums)))
+                )
+                 + Group(Optional(OneOrMore(ToneRepetition)))("noterepetition")
                  + Optional(repetition)
                  ).setWhitespaceChars("")
+        Notes = OneOrMore(Note)
+        NotesGroup = Group(Optional(Alteration)
+                        +  nestedExpr("(",")",Notes)
+                        + Optional(repetition)).setWhitespaceChars("")
 
-        groupedenote = Optional(Alteration) + "("+ OneOrMore(Note).setResultsName("notes",True)  + ")" + Optional(repetition)
+        TimeEl = (Notes|NotesGroup)
 
-        CRN = OneOrMore(groupedenote|Note).setResultsName("groupeandnotes",True)
+        CRN = OneOrMore(TimeEl)
         
         BEATS = Optional(";") + Word(alphas) + Optional(";")
 
-        phrase = nestedExpr("[","]",CRN.setResultsName("CRN",True))
-        group =  nestedExpr("(",")",CRN.setResultsName("CRN",True))
+        group =  nestedExpr("(",")",CRN)
 
         #SPLIT/MERGE LINE
-        BarBasedNotation = (
+        BarBasedNotation = Group(
             Suppress(Optional("/"))+
             OneOrMore(
                 Group(
                     Optional(OneOrMore(Alteration+Suppress("/")))("barAlt")
-                +CRN.setResultsName("CRN",True)
+                +CRN.setResultsName("barcontent",True)
                 +Optional(Suppress("/")+repetition)("barRep")
                 +Suppress(Optional("/"))
                 )).setWhitespaceChars("")
-            )
+            ).setResultsName("bars")
 
-        PhraseBasedNotation = OneOrMore(
-            Group(   
+        PhraseBasedNotation = Group(
+                OneOrMore(Group(
                     Optional(OneOrMore(Alteration))("barAlt")
-                    +Suppress("[")
-                    +CRN.setResultsName("CRN",True)
-                    +Suppress("]")
+                    +nestedExpr("[","]",CRN).setResultsName("barcontent",True)
                     +Optional(repetition)("barRep")
-                    )).setWhitespaceChars(" ")
+                    ))).setWhitespaceChars(" ").setResultsName("bars")
                 
-
-        splitmergecontent = BarBasedNotation.setResultsName("bars",True) #|PhraseBasedNotation.setResultsName("bars",True) # |GroupBasedNotation
+        splitmergecontent = BarBasedNotation |PhraseBasedNotation # |GroupBasedNotation
 
         SplitLine = (Suppress(Literal("|"))
-                     + splitmergecontent("content")
+                     + splitmergecontent.setResultsName("content")
                      + Suppress(Optional(pythonStyleComment)))
 
         MergeLine = (Suppress(Literal(":"))
-                     + splitmergecontent("content")
+                     + splitmergecontent.setResultsName("content")
                      + Suppress(Optional(pythonStyleComment)))
 
         #DATALINE vars and funcs missing
@@ -239,7 +184,7 @@ Global :
 
         #DataLine = Literal("=")("lineId") + PERFS|OneOrMore(defPhraseTag)|OneOrMore(defGroupTag)|OneOrMore(defPhraseMacro)|OneOrMore(defGroupMacro)
         DataLine = (Suppress(Literal("="))
-                    + "toBeContinued"
+                    + PERFS("perfs")
                     + Suppress(Optional(pythonStyleComment))) #-> revoir perfs (types de perfs spécifiques attendus)
         
         LyricsLine = Literal(">")("lineId") + Word(alphas)("lyrics")
@@ -256,7 +201,10 @@ Global :
         infoKeyWord = oneOf(["title","subtitle","merge","AMN","music author","file author","lyrics author"])
         infoValue = Combine(OneOrMore(Word(alphanums+" éàè_-'ç.")))
         InfoLine = (
-            (Suppress(Literal("#")) + infoKeyWord("keyWord") + Suppress("=") + infoValue("value"))
+            (Suppress(Literal("#"))
+             + infoKeyWord("keyWord")
+             + Suppress("=")
+             + infoValue("value"))
             |Suppress(Optional(pythonStyleComment))
             )
 
@@ -264,6 +212,7 @@ Global :
         infolines = []
         i=0
         voices = []
+        globalVoiceId = None
         numBloc = -1
         for line in self.__file.splitlines():
             if line != "":
@@ -276,13 +225,21 @@ Global :
                         res = voiceLineHeader.parseString(line)
                     except:
                         e = sys.exc_info()[0]
-                        print("issue at line",line,i,e)
-                        raise 
-                    voices += [{"line":i, "name": res.name, "perfs":res.perfs,"lines":[]}]
+                        print("issue at line",i,line,e)
+                        raise
+                    res.fileLine = i
+                    res.lines =[]
+                    voices += [res]
+                    
                     numBloc+=1
+                    if res.name == "global":
+                        if globalVoiceId != None :
+                            raise ValueError("There must only be one global bloc line%i"%(i))
+
+                        globalVoiceId = numBloc
                     
                 elif line[0] in "|,:,>,<,=".split(","):
-                    if voices[numBloc]["name"] == "global" and line[0]!="=" :
+                    if voices[numBloc].name == "global" and line[0]!="=" :
                         raise ValueError("You must only declare dataLines (\"=\") onto global Blocs at line%i"%(i))
 
                     if line[0] == "|" :   # splitline
@@ -290,61 +247,62 @@ Global :
                             res = SplitLine.parseString(line)
                         except:
                             e = sys.exc_info()[0]
-                            print("issue in splitline",line,i,e)
-                            raise 
-                        voices[numBloc]["lines"]+=[{"type":"split","content":res.content}]
-                        print("line",i)
-                        for bar in res.content:
-                            print("Alt",bar.barAlt, "CRN",bar.CRN,"rep", bar.barRep)
-##                            for groupnote in bar.CRN:
-##                                print(groupnote)
-                        #print(res.asDict())
+                            print("issue in splitline",i,line,e)
+                            raise
+                        res.type="split"
+                        res.fileLine = i
+                        voices[numBloc].lines+=[res]
+
                     elif line[0] == ":" :   # mergeline
-                        #assert there is a splitline to be merged with
-                        if voices[numBloc]["lines"][-1]:
-                            if voices[numBloc]["lines"][-1]["type"] == "split":
-                                try :
-                                    res = MergeLine.parseString(line)
-                                except:
-                                    e = sys.exc_info()[0]
-                                    print("issue in mergeline",line,i,e)
-                                    raise 
-                                voices[numBloc]["lines"]+=[{"type":"merge","content":res.content}]
-                            else :
-                                raise ValueError("Merge line must be after a splitline to be merged with at line %i"%(i))
-                        else :
-                            raise ValueError("Merge line must be after a splitline to be merged with at line %i"%(i))
+                            try :
+                                res = MergeLine.parseString(line)
+                            except:
+                                e = sys.exc_info()[0]
+                                print("issue in mergeline",i,line,e)
+                                raise
+                            res.fileLine = i
+                            res.type="merge"
+                            voices[numBloc].lines+=[res]
 
                     elif line[0] == "=" :   # dataline
                         try :
                             res = DataLine.parseString(line)
                         except:
                             e = sys.exc_info()[0]
-                            print("issue in dataline",line,i,e)
-                            raise 
-                        voices[numBloc]["lines"]+=[{"type":"data","content":res.content}]                    
-                    
+                            print("issue in dataline",i,line,e)
+                            raise
+                        res.type ="data"
+                        res.fileLine = i
+                        voices[numBloc].lines+=[res]                    
+                        
                     elif line[0] == ">" :   # lyricsline
                         try :
                             res = LyricsLine.parseString(line)
                         except:
                             e = sys.exc_info()[0]
-                            print("issue in lyricsline",line,i,e)
-                            raise 
-                        voices[numBloc]["lines"]+=[{"type":"lyrics","content":res.content}]
+                            print("issue in lyricsline",i,line,e)
+                            raise
+                        res.type = "lyrics"
+                        res.fileLine = i
+                        voices[numBloc].lines+=[res]
                         
                     elif line[0] == "<" :   # chordsline
                         try :
                             res = ChordsLine.parseString(line)
                         except:
                             e = sys.exc_info()[0]
-                            print("issue in chordsline",line,i,e)
-                            raise 
-                        voices[numBloc]["lines"]+=[{"type":"chords","content":res.content}]                        
+                            print("issue in chordsline",i,line,e)
+                            raise
+                        res.type = "chords"
+                        res.fileLine = i
+                        voices[numBloc].lines+=[res]                        
                 else :
                     raise ValueError("Expected one of \"#, O, |, :, >, < =\", got %c at line %i"%(line[0], i))
             i+=1
-        return {"infos":infolines, "voices":voices}
+        GlobalBloc = None
+        if globalVoiceId != None:
+            GlobalBloc = voices.pop(globalVoiceId)
+        return {"infos":infolines, "voices":voices, "global" : GlobalBloc }
 
     @property
     def Global(self):
@@ -415,14 +373,53 @@ Global :
         pass
     def play(self):
         pass
-    
-class Voice(object):
-    def __init__(self,file):
-        self.__instrument = "kazoo" #default set to kazoo
-        self.__BPM = 120 #beat per minute
-        self.__BPB = 4 #beat per bar
-        self.__PPB #pulses per bar ?
-        pass    
+                     
+infosong = r"""
+# this is a comment
+#title = Supersong # this is a comment
+#this is a comment between two infos and it works !
+# music author = Clara #this is a comment
+#this is a comment
+#AMN = 1.0
 
-print(AMNFileParser(infosong))
-#print(AMNFileParser(FJ))
+O global \$C4:C\%72:4\?%\?%            #wahoo
+= toBeContinued #todo
+= toBeContinued #todo
+
+# there's still work to do
+O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
+= toBeContinued
+| /!/C>D*EC /*******/EF\>\ G /*59
+: /CGEC/
+
+O phrasebasednotation \$C4:C\%72:4\?%\?%   
+| [CGEC]
+
+O barbasednotation
+| /CGEC/
+"""
+verre = r"""
+#title=Remplis ton verre vide
+#music author=Etienne Daniel
+#Chanson à deux voix d'après une chanson à boire de XVIIe s
+
+O global \$ F : D \% 208 : 4\
+
+O chant  \$ F : D
+| [@""A A]** [D""DC'B][A""A'A][G'FE'A][AA B][F""F]
+
+O flute
+| /!/C>D*EC /*******/EF\>\ G /*59
+: /CGEC/CG EC/CGE C/
+"""
+boogie = r"""
+#------------------------------------------------------------------------------------------------------------------------------------
+#title= Boogie
+#Et est-ce que c'est comme en musique quand il y a des dièses et des bémol? Cad que le dièses s'applique sur toute la mesure? 
+O piano \$C5\%120:4\
+| [+DE GG +DE GG] [+DE CC @'] [+GA >C>C +GA >C>C] [GF EC @'] [B+D BG A>C AF] [+DE CC @']
+= \$C4\
+: [CG CG CG CG] [CG CG -BG >C] [>%FC >%FC >%FC >%FC] [CG CG -BG >C] [>%GD >%GD >%FD >%FD] [CG CG -BG >C] #chord notation
+#est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
+"""
+print(AMNFileParser(verre))

@@ -1,24 +1,9 @@
-C   D  E  F  G  A  B
-do|re|mi|fa|sol|la|si
-
-#title=Remplis ton verre vide
-#author=Etienne Daniel
-#Chanson à deux voix d'après une chanson à boire de XVIIe s
-
-O global \$ F : D \% 208 : 4\
-
-O voice1 
-| [@""A]   [D'DC'B] [A"A'A] [G'FE'A] [F""F]
-< [F'FE'D][A'A A'A] [BCDDEC] [D]
-
-#------------------------------------------------------------------------------------
 #title= Tourdion
 #subtitle= Quand je bois du vin clairet
 #author = Anonymous
 #parole de chanson à ajouter. Question pour Monsieur Schlick, le langage pour les paroles est-il le même que pour les notes? Ou osef, c'est juste visuel?
 #Quand on dit IPN = A4, si on fait un si(B) , ça donne le B5 ou le B4???
 #Si on indique la gamme dans les perfs, est-ce que les bémol/ dièses sont mis automatiquement sur la note quand elle est indiquée ou faut quand même les mettre à la main???
-#Le ternaire c'est chiant
 O global \$ D : D \% 104 : 2\
 
 O voice1
@@ -35,7 +20,4 @@ O voice3 \$E\
 
 O voice4 \$B3\
 | [E" 'E] [E" 'E] [G'>B 'A'] [E'F "'] [E" 'E] [E" 'E] [E" 'D] [E] 
-< [E" 'E'] [G" 'G'] [B" 'B'] [E" 'E'] [G" 'G'] [G" 'D'] [E'B "'] [E] 
-
-
-#----------------------------------------------------------------------------------------
+< [E" 'E'] [G" 'G'] [B" 'B'] [E" 'E'] [G" 'G'] [G" 'D'] [E'B "'] [E]

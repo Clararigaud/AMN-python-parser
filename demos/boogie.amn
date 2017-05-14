@@ -1,0 +1,8 @@
+#------------------------------------------------------------------------------------------------------------------------------------
+#title= Boogie
+#Et est-ce que c'est comme en musique quand il y a des dièses et des bémol? Cad que le dièses s'applique sur toute la mesure? 
+O piano \$C5\%120:4\
+| [+DE GG +DE GG] [+DE CC @'] [+GA >C>C +GA >C>C] [GF EC @'] [B+D BG A>C AF] [+DE CC @']
+= \$C4\ 
+: [Cg Cg Cg CG] [Cg Cg -BG >C] [>%Fc >%Fc >%Fc >%Fc] [Cg Cg -BG >C] [>%Gd >%Gd >%Fc >%Fc] [Cg Cg -BG >C]
+#est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?

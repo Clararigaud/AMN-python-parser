@@ -1,0 +1,8 @@
+Salut ! Bon j'ai pas trop avancé en termes de code mais j'ai beaucoup réfléchis à ce qui serait le plus simple. En fait en écrivant les classes je reflechissais en même temps à comment les faire au mieux pour que ça nous arrange pour lilypond et pour midi. J'en suis arrivé au fait que pousser trop dans le côté sémantique (en refaisant des classes voice, bar, ..) ne sert pas à grand chose étant donné que la manière dont on va utiliser les données pour lilypond et pour midi son completement différentes. 
+Du coup j'ai conclu qu'il fallait mieux rester basé sur le parseResult qui a déjà une structure et qui est tout aussi compréhensible. (sans classe explicite) 
+ca sera aussi plus rapide en terme de performance.
+Donc ce que j'ai préféré faire, c'est d'améliorer les manire dont on gère les groupes, les noms, pour rendre la sortie la plus exploitable possible (sans avoir des listes de listes inutiles)
+
+J'ai aussi réparé plusieurs bugs (il y en avait beaucoup !! )
+
+ 

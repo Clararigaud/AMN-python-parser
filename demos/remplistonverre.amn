@@ -1,0 +1,9 @@
+#title=Remplis ton verre vide
+#author=Etienne Daniel
+#Chanson à deux voix d'après une chanson à boire de XVIIe s
+
+O global \$ F : D \% 208 : 4\
+
+O voice1 
+| [@""A]   [D'DC'B] [A"A'A] [G'FE'A] [F""F]
+< [F'FE'D][A'A A'A] [BCDDEC] [D]

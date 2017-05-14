@@ -1,0 +1,7 @@
+#--------------------------------------------------------------------------------------------------------------------------------------
+#title= La ballade à Billy
+#comment je fais la liaison entre le quatrième et le troisième C?
+O piano \$D5\%120:4\
+| [C>D ->EC >DC AG] [+FD FD EC C] [<CD EF GA BC] [AG +FG G'] [>-ED CA C C] [>-G>F>-E C C'] [GA CA >DC AG] [+FD FE EC C]
+= \$C4\ 
+:[C' E'] [D G C'] [C' E'] [D' G'] [C' E'] [F' +F'] [G' A'] [D G C']  
