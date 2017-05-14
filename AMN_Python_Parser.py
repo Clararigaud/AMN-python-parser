@@ -307,7 +307,10 @@ bars:"""
     @property
     def Global(self):
         return self.__Global
-    
+
+    @property
+    def Voices(self):
+        return self.__Voices 
     @property
     def nbVoices(self):
         return len(self.__Voices)
@@ -422,4 +425,4 @@ O piano \$C5\%120:4\
 : [CG CG CG CG] [CG CG -BG >C] [>%FC >%FC >%FC >%FC] [CG CG -BG >C] [>%GD >%GD >%FD >%FD] [CG CG -BG >C] #chord notation
 #est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
 """
-print(AMNFileParser(verre))
+print(AMNFileParser(infosong))
