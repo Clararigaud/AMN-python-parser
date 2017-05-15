@@ -9,17 +9,22 @@ voices:list
         .lines : list
             [parseResult:
                 .type : "data" or "merge" or "split" or "chord" or "lyrics"
-                    .content : list
-                        [parseResult:
-                            .barAlt:parseResult
-                            .barRep : parseResult
-                            .barcontent : list
-                                [parseResult:
-                                    .note : parseResult
-                                    .noteRepetition : parseResult
-                                    .noteAlteration : parseResult
-		]
-                          ]
+                .content : list
+                    [parseResult:
+                        .barAlt:parseResult
+                        .barRep : parseResult
+                        .barcontent : list
+                            [parseResult:
+                                .Notes : list
+                                    [parseResult
+                                        .note
+                                        .noteRepetition : parseResult
+                                        .noteAlteration : parseResult
+                                        .noteOrnament : parseResult
+                                        .noteTimeAlteration : parseResult
+                                    ]
+                            ]
+                    ]
             ]
     ]
 	                

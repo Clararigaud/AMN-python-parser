@@ -95,7 +95,7 @@ Nb Voices:{0.nbVoices}""".format(self)
         #ALTERATIONS
         DYNAMICALT = oneOf("! ? . _ :")
         PITCHALT = oneOf("+ - > < ~")
-        ALT = DYNAMICALT | PITCHALT
+        ALT = DYNAMICALT("dynamic") | PITCHALT("pitch")
         strength = (Optional(Word(nums))+ "%") | "0"
         Alteration = Group(OneOrMore(ALT) + Optional(strength))
 
@@ -105,12 +105,12 @@ Nb Voices:{0.nbVoices}""".format(self)
         
         Note = ((Optional(Alteration)("noteAlteration")
                 + (Pitch |Literal("@"))("note")
-                + Optional(NoteOrnaments)
+                + Optional(NoteOrnaments)("noteOrnament")
                 )
-                 + Group(Optional(OneOrMore(ToneRepetition))("noteRepetition"))
-                 + Optional(repetition)
+                 + Group(Optional(OneOrMore(ToneRepetition)))("timeAlteration")
+                 + Optional(repetition)("noteRepetition")
                  ).setWhitespaceChars("")
-        Notes = OneOrMore(Note)
+        Notes = OneOrMore(Note.setResultsName("Notes",True))
         NotesGroup = Group(Optional(Alteration)
                         +  nestedExpr("(",")",Notes)
                         + Optional(repetition)).setWhitespaceChars("")
@@ -405,4 +405,15 @@ O piano \$C5\%120:4\
 : [CG CG CG CG] [CG CG -BG >C] [>%FC >%FC >%FC >%FC] [CG CG -BG >C] [>%GD >%GD >%FD >%FD] [CG CG -BG >C] #chord notation
 #est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
 """
-print(AMNFileParser(infosong))
+if __name__ == "__main__":
+    parsed = AMNFileParser(infosong)
+    print(parsed)
+
+    print(parsed.Voices[0].name)
+    print(parsed.Voices[0].lines[0].type)
+    for bar in parsed.Voices[0].lines[0].content:
+        print("Bar repetition :",bar.barRep)
+        print("Bar alteration :",bar.barAlt)
+        for timel in bar.barcontent:
+            for note in timel.Notes:
+                print("note",note.note,"alteration",note.noteAlteration,"ornament",note.noteOrnament,"repetition",note.noteRepetition,"timealteration",note.timeAlteration)
