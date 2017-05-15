@@ -19,7 +19,7 @@ class AMNFileParser(object):
             setattr(self,info["keyWord"].replace(" ", ""),info["value"])
         self.__Voices = parsed["voices"]
         self.__Global = parsed["global"]
-        
+
     def __str__(self):
         s = """\n--------FILE INFOS------------
 AMN version: {0.AMN}
@@ -30,31 +30,6 @@ Lyrics Author:{0.lyricsauthor}
 File Author:{0.fileauthor}
 File to merge: {0.merge}
 Nb Voices:{0.nbVoices}""".format(self)
-
-        if self.__Global:
-            s+="""
-Global : 
-    Perfs: {0.perfs}
-    Datas : {0.lines}
-
-Voices :""".format(self.__Global)
-            
-        for voice in self.__Voices:
-            s+= """
-
-    Instru : {0.name}
-    at line : {0.fileLine}
-    local perfs : {0.perfs}
-""".format(voice)
-            for line in voice.lines:
-                s+= """
-    Line type : %s"""%(line.type)
-                if line.content != '':
-                    s+= """
-bars:"""
-                    for bar in line.content:
-                        s+="\n ->  CRN:{0.barcontent}, Bar Repetition : {0.barRep}, Bar Alteration : {0.barAlt}".format(bar)
-       
         return s
     
     def parseFile(self):
@@ -102,6 +77,8 @@ bars:"""
 
         GlobalVoicePerf = oneOf('% $ ! !! !!! !N ? ?? ??? ?N !% ?% ?~! !~? ?~~! !~~? @~= =~@ @~~= =~~@ =') # non
         BarOrnaments = oneOf('| :| |: :|: 1 2 N $ @ >$ <$ <@ >@')# non
+
+#=========================================================
         NoteOrnaments = (Suppress("\\")
                          +oneOf('< > << >> + - +- -+ ++ -- =+ =- =+=- =-=+ +=* =-* DGAG DG* =~~++ =~~+ =~~-- =~~- =~~+* =~~-* =~~!! =~~! =~~?? =~~? =~~!* =~~?*')
                          +Suppress("\\")
@@ -126,11 +103,11 @@ bars:"""
         #Compact Rythm Notation
         ToneRepetition = Literal("\"") | Literal("'") |OneOrMore(Word(nums))
         
-        Note = ((Optional(Alteration)("ALT")
+        Note = ((Optional(Alteration)("noteAlteration")
                 + (Pitch |Literal("@"))("note")
                 + Optional(NoteOrnaments)
                 )
-                 + Group(Optional(OneOrMore(ToneRepetition)))("noterepetition")
+                 + Group(Optional(OneOrMore(ToneRepetition))("noteRepetition"))
                  + Optional(repetition)
                  ).setWhitespaceChars("")
         Notes = OneOrMore(Note)
@@ -138,9 +115,9 @@ bars:"""
                         +  nestedExpr("(",")",Notes)
                         + Optional(repetition)).setWhitespaceChars("")
 
-        TimeEl = (Notes|NotesGroup)
-
-        CRN = OneOrMore(TimeEl)
+        TimeEl = Notes|NotesGroup
+#==============================================
+        CRN = OneOrMore(Word(printables, excludeChars="\n [ ] / "))
         
         BEATS = Optional(";") + Word(alphas) + Optional(";")
 
@@ -152,18 +129,18 @@ bars:"""
             OneOrMore(
                 Group(
                     Optional(OneOrMore(Alteration+Suppress("/")))("barAlt")
-                +CRN.setResultsName("barcontent",True)
+                +Group(Group(CRN)).setResultsName("barcontent")
                 +Optional(Suppress("/")+repetition)("barRep")
                 +Suppress(Optional("/"))
-                )).setWhitespaceChars("")
+                ).setWhitespaceChars(""))
             ).setResultsName("bars")
 
         PhraseBasedNotation = Group(
                 OneOrMore(Group(
                     Optional(OneOrMore(Alteration))("barAlt")
-                    +nestedExpr("[","]",CRN).setResultsName("barcontent",True)
+                    +nestedExpr("[","]",CRN).setResultsName("barcontent")
                     +Optional(repetition)("barRep")
-                    ))).setWhitespaceChars(" ").setResultsName("bars")
+                    ))).setResultsName("bars")
                 
         splitmergecontent = BarBasedNotation |PhraseBasedNotation # |GroupBasedNotation
 
@@ -174,7 +151,7 @@ bars:"""
         MergeLine = (Suppress(Literal(":"))
                      + splitmergecontent.setResultsName("content")
                      + Suppress(Optional(pythonStyleComment)))
-
+        
         #DATALINE vars and funcs missing
         
         #defPhraseTag = varName + "=" + phrase
@@ -235,7 +212,6 @@ bars:"""
                     if res.name == "global":
                         if globalVoiceId != None :
                             raise ValueError("There must only be one global bloc line%i"%(i))
-
                         globalVoiceId = numBloc
                     
                 elif line[0] in "|,:,>,<,=".split(","):
@@ -253,17 +229,24 @@ bars:"""
                         res.fileLine = i
                         voices[numBloc].lines+=[res]
 
+                        #parsing bars
+                        for i in range(len(res.content)):    
+                            res.content[i].barcontent = [TimeEl.parseString(timel) for timel in res.content[i].barcontent[0]]      
+                                    
                     elif line[0] == ":" :   # mergeline
-                            try :
-                                res = MergeLine.parseString(line)
-                            except:
-                                e = sys.exc_info()[0]
-                                print("issue in mergeline",i,line,e)
-                                raise
-                            res.fileLine = i
-                            res.type="merge"
-                            voices[numBloc].lines+=[res]
-
+                        try :
+                            res = MergeLine.parseString(line)
+                        except:
+                            e = sys.exc_info()[0]
+                            print("issue in mergeline",i,line,e)
+                            raise
+                        res.fileLine = i
+                        res.type="merge"
+                        voices[numBloc].lines+=[res]
+                        #parsing bars
+                        for i in range(len(res.content)):    
+                            res.content[i].barcontent = [TimeEl.parseString(timel) for timel in res.content[i].barcontent[0]]
+                            
                     elif line[0] == "=" :   # dataline
                         try :
                             res = DataLine.parseString(line)
@@ -386,17 +369,14 @@ infosong = r"""
 #AMN = 1.0
 
 O global \$C4:C\%72:4\?%\?%            #wahoo
-= toBeContinued #todo
-= toBeContinued #todo
 
 # there's still work to do
 O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
-= toBeContinued
 | /!/C>D*EC /*******/EF\>\ G /*59
-: /CGEC/
+: /C GEC/
 
 O phrasebasednotation \$C4:C\%72:4\?%\?%   
-| [CGEC]
+| [CGEC] [C GEC]
 
 O barbasednotation
 | /CGEC/

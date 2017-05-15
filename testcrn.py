@@ -6,7 +6,7 @@ NoteOrnaments = (Suppress("\\")
                  +oneOf('< > << >> + - +- -+ ++ -- =+ =- =+=- =-=+ +=* =-* DGAG DG* =~~++ =~~+ =~~-- =~~- =~~+* =~~-* =~~!! =~~! =~~?? =~~? =~~!* =~~?*')
                  +Suppress("\\")
                  )
-Pitch = Word(srange('[A-G]'),exact=1)
+Pitch = Word(srange('[A-G]'),exact=1,max=1)
 #ALTERATIONS
 DYNAMICALT = oneOf("! ? . _ :")
 PITCHALT = oneOf("+ - > < ~")
@@ -17,24 +17,22 @@ Alteration = Group(OneOrMore(ALT) + Optional(strength))
 repetition = "*" + Optional(OneOrMore("*") | Word(nums))
 #Compact Rythm Notation
 ToneRepetition = Literal("\"") | Literal("'") |OneOrMore(Word(nums))
-Note = ((Optional(Alteration)("ALT")
-        + (Pitch |Literal("@"))
-        + Optional(NoteOrnaments)
-        )
-         + Group(Optional(OneOrMore(ToneRepetition)))
+Note = Group((Optional(Alteration)("ALT")
+        + (Pitch |Literal("@"))("note").setWhitespaceChars("")
+        + Optional(NoteOrnaments)("ornament")
+        ).setWhitespaceChars("")
+         + Optional(Group(OneOrMore(ToneRepetition)))("noterepetition")
          + Optional(repetition)
-         )
+         ).setWhitespaceChars("")
 
-NotesGroup = (Optional(Alteration)
-                +  nestedExpr("(",")",OneOrMore(Note))
-                + Optional(repetition)).setWhitespaceChars("")
+Notes = Group(OneOrMore(Note).setWhitespaceChars("")).setResultsName("Notes")
+NotesGroup = Group(Optional(Alteration)
+                +  nestedExpr("(",")",Notes)
+                + Optional(repetition)).setWhitespaceChars("")("GroupNotes")
 
-Notes = OneOrMore(Note).setResultsName("note",True).setWhitespaceChars("")
-
-TimeEl = Group(OneOrMore(Note,stopOn=" ")).setResultsName("el",True)
-CRN = OneOrMore(TimeEl).setWhitespaceChars(" ")
-
-s = "A AA"
+CRN = OneOrMore(Word(printables, excludeChars="\n [ ] / "))
+s = "A' %B''''' +CD"
 
 res = CRN.parseString(s)
-print(res.asDict())
+print(res)
+
