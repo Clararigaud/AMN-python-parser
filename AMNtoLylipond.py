@@ -73,20 +73,27 @@ class AMNtoLylipond(AMNFileParser):
         text += '}\n'
         fichier.write(text)
         fichier.close()
-        merge1=''
-        merge2=''
         score=''
         for voice in self.Voices:
+            merge = ''
             i=0
-            score+='\score{'
+            score+=r'\new Staff { '
             for lines in voice.lines:
                 supplement=''
                 for j in range(i):
                     supplement+='a'
+
                 if lines.type == 'split':
-                    score += '\\' + voice.name + supplement + ' '
+                    score += '\\'
+                if lines.type == 'merge':
+                    score='<< '+score+'}\n '+ '\\new Staff { \\'
+                    merge='>>\n'
                 text += voice.name + supplement+ '='
                 for bar in lines.content:
+                    if bar.barRep:
+                        score += 'set countPercentRepeats = ##t \n' + r'\repeat percent ' + str(len(bar.barRep) + 1) + '{ \\' + voice.name + supplement + '}'
+                    else:
+                        score+= voice.name + supplement + ' '
                     bartext='{'
                     for barelem in bar.barcontent:
                         for notes in barelem.Notes:
@@ -96,20 +103,14 @@ class AMNtoLylipond(AMNFileParser):
                                     bartext+=' '+dico_note[notes.note] + ' '
                             if notes.noteAlteration:
                                 pass
-                    bartext+='}'
+
+                    text+=bartext + '} '
                                  #donne un fichier bartext qui donne le contenu de la bar traduit
-                    if bar.barRep:
-                        text += '\set countPercentRepeats = ##t \n'+r'\repeat percent '+str(len(bar.barRep)) + bartext
-                    else:
-                        text += bartext + ' '
                     i += 1
                 score+='\n'
                 text += '\n'
-            score+='}\n'
-
-
-
-        print(score)
+            score+='}\n' +merge
+        text+=score
         print(text)
 
 
