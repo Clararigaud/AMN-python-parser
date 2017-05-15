@@ -58,17 +58,20 @@ class AMNtoLylipond(AMNFileParser):
         AMNFileParser.__init__(self,AMNfile)
         self.translate()
     def translate(self):
-        text ='\header {'
-        dico_note = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f'}
-        dico_dyn_alteration={'!':'^', '?':'+','.':'.','_':'-'}
-        i=0
-        listAMN=[self.title,self.subtitle,self.musicauthor,self.fileauthor,self.lyricsauthor]
-        listLyli=['title','subtitle','composer','arranger','poet']
-        for param in listAMN:
+        
+        fichier = open(str(self.title)+".ly", "w")
+        text = '\header {\n'
+        i = 0
+        dic = {self.title: "title", self.subtitle: "subtitle", self.musicauthor: "composer",
+               self.fileauthor: "arranger", self.lyricsauthor: None}
+        for param in dic:
             if param:
-                text=text+listLyli[i]+'="'+param+'" \n'
-            i+=1
-        text+='} \n '
+                text += dic[param] + '="' + param + '" \n'
+            i += 1
+        text += '}\n'
+        fichier.write(text)
+        fichier.close()
+        
         for voice in self.Voices:
             i=0
             for lines in voice.lines:
