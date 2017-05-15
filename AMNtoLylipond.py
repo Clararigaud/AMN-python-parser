@@ -73,39 +73,43 @@ class AMNtoLylipond(AMNFileParser):
         text += '}\n'
         fichier.write(text)
         fichier.close()
-        
+        merge1=''
+        merge2=''
+        score=''
         for voice in self.Voices:
             i=0
+            score+='\score{'
             for lines in voice.lines:
+                supplement=''
+                for j in range(i):
+                    supplement+='a'
                 if lines.type == 'split':
-                    supplement=''
-                    for j in range(i):
-                        supplement+='a'
-                    text += voice.name + supplement+ '='
-                    for bar in lines.content:
-                        bartext='{'
-                        for barelem in bar.barcontent:
-                            for notes in barelem.Notes:
-                                bartext+=' '+dico_note[notes.note] + ' '
-                                if notes.noteRepetition:
-                                    for i in range(len(notes.noteRepetition)):
-                                        bartext+=' '+dico_note[notes.note] + ' '
-                                if notes.noteAlteration:
-                                    pass
-                                        # if not.repet
-                                        # if not.result
-                                        # if note.alteration
-                        bartext+='}'
+                    score += '\\' + voice.name + supplement + ' '
+                text += voice.name + supplement+ '='
+                for bar in lines.content:
+                    bartext='{'
+                    for barelem in bar.barcontent:
+                        for notes in barelem.Notes:
+                            bartext+=' '+dico_note[notes.note] + ' '
+                            if notes.noteRepetition:
+                                for i in range(len(notes.noteRepetition)):
+                                    bartext+=' '+dico_note[notes.note] + ' '
+                            if notes.noteAlteration:
+                                pass
+                    bartext+='}'
                                  #donne un fichier bartext qui donne le contenu de la bar traduit
-                        if bar.barRep:
-                            text += '\set countPercentRepeats = ##t \n'+r'\repeat percent '+str(len(bar.barRep)) + bartext
-                        else:
-                            text += bartext + ' '
+                    if bar.barRep:
+                        text += '\set countPercentRepeats = ##t \n'+r'\repeat percent '+str(len(bar.barRep)) + bartext
+                    else:
+                        text += bartext + ' '
+                    i += 1
+                score+='\n'
+                text += '\n'
+            score+='}\n'
 
-                    i+=1
-                text+='\n'
 
 
+        print(score)
         print(text)
 
 
