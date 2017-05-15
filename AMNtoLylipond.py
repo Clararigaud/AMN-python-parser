@@ -61,9 +61,11 @@ class AMNtoLylipond(AMNFileParser):
         
         fichier = open(str(self.title)+".ly", "w")
         text = '\header {\n'
+        dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g'}
+        dico_dyn_alteration = {'!': '^', '?': '+', '.': '.', '_': '-'}
         i = 0
         dic = {self.title: "title", self.subtitle: "subtitle", self.musicauthor: "composer",
-               self.fileauthor: "arranger", self.lyricsauthor: None}
+               self.fileauthor: "arranger", self.lyricsauthor: 'poet'}
         for param in dic:
             if param:
                 text += dic[param] + '="' + param + '" \n'
@@ -85,11 +87,10 @@ class AMNtoLylipond(AMNFileParser):
                         for barelem in bar.barcontent:
                             for notes in barelem.Notes:
                                 bartext+=' '+dico_note[notes.note] + ' '
-                                if barelem.noteRepetition:
-                                    pass
-                                        # seulement pour les **** mais y a aussi *59
-                                        # if * not in barelem.noteRepetition
-                                if barelem.noteAlteration:
+                                if notes.noteRepetition:
+                                    for i in range(len(notes.noteRepetition)):
+                                        bartext+=' '+dico_note[notes.note] + ' '
+                                if notes.noteAlteration:
                                     pass
                                         # if not.repet
                                         # if not.result
