@@ -9,12 +9,12 @@ from AMN_Python_Parser import *
 FJ = r"""
 #title= Tourdion
 #subtitle= Quand je bois du vin clairet
-#author = Anonymous
+#music author = Anonymous
 #parole de chanson à ajouter. Question pour Monsieur Schlick, le langage pour les paroles est-il le même que pour les notes? Ou osef, c'est juste visuel?
 #Quand on dit IPN = A4, si on fait un si(B) , ça donne le B5 ou le B4???
 #Si on indique la gamme dans les perfs, est-ce que les bémol/ dièses sont mis automatiquement sur la note quand elle est indiquée ou faut quand même les mettre à la main???
 #Le ternaire c'est chiant
-O global \$ D : D \% 104 : 2\
+O global \$ A6 : D \% 104 : 2\
 
 O voixune
 |  / EFG AGF / E" FGA / BAG GAF / G' FED / EFG AGF / E' G' F' / E"' D' / E /
@@ -82,7 +82,7 @@ class AMNtoLylipond(AMNFileParser):
         
         fichier = open(str(self.title)+".ly", "w")
         text = '\header {\n'
-        dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g'}
+        self.__dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g'}
         dico_dyn_alteration = {'!': '^', '?': '+', '.': '.', '_': '-'}
         i = 0
         dic = {self.title: "title", self.subtitle: "subtitle", self.musicauthor: "composer",
@@ -95,23 +95,31 @@ class AMNtoLylipond(AMNFileParser):
         fichier.write(text)
         fichier.close()
         score=''
+        clef=''
+        relative=''
+        #global
+        if self.Global.perfs.SSIG:
+            clef,relative=self.convert_perfs(self.Global.perfs.SSIG)
+
         for voice in self.Voices:
             newStaff = ''
             merge1 = merge2 = ''
             i=0
             newStaff+=r'\new Staff { '
+            #perfs
+            if voice.perfs:
+                if voice.perfs.SSIG: clef, relative = self.convert_perfs(voice.perfs.SSIG)
             for lines in voice.lines:
                 supplement=''
                 for j in range(i):
                     supplement+='a'
-
                 if lines.type == 'split':
                     newStaff += '\\'
                 if lines.type == 'merge':
                     newStaff+='}\n '+ '\\new Staff { \\'
-                    merge1='<<'
+                    merge1=r'\new GrandStaff<<\set GrandStaff.instrumentName = #"'+ voice.name+'" '
                     merge2='>>\n'
-                text += voice.name + supplement+ '=' + '{'
+                text += voice.name + supplement+ '=' + relative + '{' + clef
                 newStaff+=voice.name + supplement
                 for bar in lines.content:
                     #if bar.barRep:
@@ -121,10 +129,10 @@ class AMNtoLylipond(AMNFileParser):
                     bartext=''
                     for barelem in bar.barcontent:
                         for notes in barelem.Notes:
-                            bartext+=' '+dico_note[notes.note] + ' '
+                            bartext+=' '+self.__dico_note[notes.note] + ' '
                             if notes.noteRepetition:
                                 for i in range(len(notes.noteRepetition)):
-                                    bartext+=' '+dico_note[notes.note] + ' '
+                                    bartext+=' '+self.__dico_note[notes.note] + ' '
                             if notes.noteAlteration:
                                 pass
                     if bar.barRep:
@@ -135,9 +143,34 @@ class AMNtoLylipond(AMNFileParser):
                 text += '} \n'
             newStaff=merge1+ newStaff+'}\n' +merge2
             score+=newStaff
+        score='<<'+score+'>>'
         text+=score
         print(text)
+    def convert_perfs(self,ssig):
+        clef=''
+        relative=''
+        hauteur = 5
+        if ssig.IPN:
+            relative = self.__dico_note[ssig.IPN.pitch]
+            if ssig.IPN.octave:
+                hauteur=int(ssig.IPN.octave)
 
+        if ssig.MPN:
+            list = ['C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G', 'A', 'A', 'B']
+            octave = int(ssig.MPN) // 12 - 1
+            pitch = list[int(ssig.MPN) % 12]
+            relative = self.__dico_note[pitch]
+            hauteur=octave
+
+        if hauteur < 5:
+            clef = '\clef bass'
+            for i in range(hauteur, 4):
+                relative += ','
+        else:
+            for i in reversed(range(4,hauteur)):
+                relative+="'"
+        relative = r'\relative '+ relative
+        return clef, relative
 
 
 
