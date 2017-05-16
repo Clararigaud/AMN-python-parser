@@ -11,7 +11,6 @@ voices: *list*:
 	* .fileLine : *int*
 	* .perfs : *parseResult*
 		* .SSIG : *parseResult*:
-			* .EOS : *parseResult*:
 			* .MPN : *str(int) or "''*
 			* .IPN : *parseResult*:
 				* .sign : "+" or "-" or ""
@@ -20,6 +19,23 @@ voices: *list*:
 		* .BSIG :  *parseResult*:
 			* .BPM : *str(int) or ""*
 			* .dynamic : *str(int) or ""*
+		*.suiteforte : *["!","!",...] or ""*
+		*.factorforte : *"N" or ""*
+		*.mezzoforte : *"%" or ""*
+		*.suitepiano : *["?","?",...] or ""*
+		*.factorpiano : *"N" or ""*
+		*.mezzopiano : *"%" or ""*
+		*.shortcrescendo :  *"?~!" or ""*
+		*.longcrescendo :  *"?~~!" or ""*
+		*.shortdecrescendo :  *"!~?" or ""*
+		*.longdecrescendo :  *"!~~?" or ""*
+		*.shortfadin :  *"@~=" or ""*
+		*.longfadein :  *"@~~=" or ""*
+		*.shortfadout :  *"=~@" or ""*
+		*.longfadeout :  *"=~~@" or ""*
+		*.tradexp: *str or ""*
+		*.cancel: *"=" or ""* 
+
 	* .lines : *list*
 		* [*parseResult*:
 			* .type : "data" or "merge" or "split" or "chord" or "lyrics"

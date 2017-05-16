@@ -84,15 +84,50 @@ Nb Voices:{0.nbVoices}""".format(self)
                 )
 
         #GLOBALVOICEPERFS=======================================================
-        GlobalVoicePerf = oneOf('% $ ! !! !!! !N ? ?? ??? ?N !% ?% ?~! !~? ?~~! !~~? @~= =~@ @~~= =~~@ =') # non
-
+        
+        GlobalVoicePerf = (
+            
+                (
+                    Group(Literal("!")+OneOrMore(Literal("!")))("suiteforte")
+                    |(Suppress(Literal("!"))+Word(nums)("factorforte"))
+                    |(Suppress(Literal("!"))+Literal("%")("mezzoforte"))
+                    )
+                |(
+                    Group(Literal("?")+OneOrMore(Literal("?")))("suitepiano")
+                    |(Suppress(Literal("?"))+Word(nums)("factorpiano"))
+                    |(Suppress(Literal("?"))+Literal("%")("mezzopiano"))
+                    )
+            |(
+                (
+                    Literal("?~!")("shortcrescendo")
+                    |Literal("?~~!")("longcrescendo")
+                    )
+                |(
+                    Literal("!~?")("shortdecrescendo")
+                    |Literal("!~~?")("longdecrescendo")
+                    )
+                )
+            |(
+                (
+                    Literal("@~=")("shortfadein")
+                    |Literal("@~~=")("longfadein")
+                    )
+                |(
+                    Literal("=~@")("shortfadeout")
+                    |Literal("=~~@")("longfadeout")
+                    )
+            
+                )
+            |Combine(Word(alphas+" "))("tradexp") #traditionnal expression
+            |Literal("=")("cancel")
+            )
 
         PERFS = ( # ordre classique clé/tempo/ "décorateurs"
             Suppress("\\")
             +(
                 Optional(SSIG.setResultsName("SSIG")+Suppress(Optional("\\")))
                  + Optional(BSIG+Suppress(Optional("\\")))("BSIG")
-                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\")))("voiceperfs")
+                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\"))).setResultsName("volumealteration",True)
                  ).setWhitespaceChars("")) 
 
     #===========================================================================
@@ -385,10 +420,10 @@ infosong = r"""
 #this is a comment
 #AMN = 1.0
 
-O global \$-C5:C\%72:4\?%\?%            #wahoo
+O global \$-C5:C\%72:4\?%\!!!!\mezzo forte\=       #wahoo
 
 # there's still work to do
-O barbasednotation \$-C4:C\%72~120\?% #perfs without closing antislash rocks
+O barbasednotation \$-C4:C\%72~120\?%\!!!\=~~@\mezzo forte\=\?9  #perfs without closing antislash rocks
 | /!/C>D*EC /*******/EF\>\ G /*59
 : /C GEC/
 
@@ -426,7 +461,9 @@ O piano \$C5\%120:4\
 if __name__ == "__main__":
     parsed = AMNFileParser(infosong)
     print(parsed)
-    print(parsed.Voices[0].perfs.SSIG.MPN)
+    print(parsed.Voices[0].perfs.asDict())
+    print(parsed.Voices[0].perfs.factorpiano)
+    
     print(parsed.Voices[0].perfs.SSIG.IPN.sign)
     print(parsed.Voices[0].perfs.SSIG.IPN.pitch)
     print(parsed.Voices[0].perfs.SSIG.IPN.octave)
