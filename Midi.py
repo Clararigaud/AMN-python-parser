@@ -6,6 +6,7 @@ except ImportError:
         import pip
         print("\nInstallation du module MIDIUtil")
         pip.main(['install', "MIDIUtil"])
+        from midiutil import MIDIFile
     except:
         print("failed")
 
