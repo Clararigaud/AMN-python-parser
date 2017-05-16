@@ -83,8 +83,7 @@ Nb Voices:{0.nbVoices}""".format(self)
                            + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE")
                 )
 
-        #GLOBALVOICEPERFS=======================================================
-        
+        #GLOBALVOICEPERFS=======================================================        
         GlobalVoicePerf = (
             
                 (
@@ -127,40 +126,74 @@ Nb Voices:{0.nbVoices}""".format(self)
             +(
                 Optional(SSIG.setResultsName("SSIG")+Suppress(Optional("\\")))
                  + Optional(BSIG+Suppress(Optional("\\")))("BSIG")
-                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\"))).setResultsName("volumealteration",True)
+                 + ZeroOrMore(
+                     GlobalVoicePerf
+                     +Suppress(Optional("\\"))
+                     ).setResultsName("volumealteration",True)
                  ).setWhitespaceChars("")) 
 
-    #===========================================================================
-
-        BarOrnaments = oneOf('| :| |: :|: 1 2 N $ @ >$ <$ <@ >@')# non
-
-#=========================================================
-        NoteOrnaments = (Suppress("\\")
-                         +oneOf('< > << >> + - +- -+ ++ -- =+ =- =+=- =-=+ +=* =-* DGAG DG* =~~++ =~~+ =~~-- =~~- =~~+* =~~-* =~~!! =~~! =~~?? =~~? =~~!* =~~?*')
-                         +Suppress("\\")
-                         )
-        ChordsOrnaments = oneOf('-+ +- -~+ +~- -~~+ +~~-')
-
-        #ECN = Chords Notations CCN and ECN to be done
-
-        
-        #ALTERATIONS
+  #ALTERATIONS =================================================================
         DYNAMICALT = oneOf("! ? . _ :")
         PITCHALT = oneOf("+ - > < ~")
         ALT = DYNAMICALT("dynamic") | PITCHALT("pitch")
         strength = (Optional(Word(nums))+ "%") | "0"
         Alteration = Group(OneOrMore(ALT) + Optional(strength))
 
-        repetition = "*" + Optional(OneOrMore("*") | Word(nums))
-        #Compact Rythm Notation
-        ToneRepetition = Literal("\"") | Literal("'") |OneOrMore(Word(nums))
+  #REPETITION ==================================================================
+        repetition = (
+            (Suppress(Literal("*"))+Word(nums)("repfactor"))
+            | Group(OneOrMore("*"))("repsuite")
+            )
         
+  #CHORDS ======================= NOT OK =======================================
+        #Chords Notations CCN and ECN to be done
+        ChordsOrnaments = oneOf('-+ +- -~+ +~- -~~+ +~~-')
+        
+  #NOTES =======================================================================
+        NoteOrnament = (Suppress("\\")
+                         + (
+                             Literal("<")("leftshortsyncopa")
+                             |Literal(">")("rightshortsyncopa")
+                             |Literal("<<")("leftlongsyncopa")
+                             |Literal(">>")("rightlongsyncopa")
+                             |Literal("+")("upperacciaccatura")
+                             |Literal("-")("loweracciaccatura")
+                             |Literal("+-")("upperdoubleacciaccatura")
+                             |Literal("-+")("lowerdoubleacciaccatura")
+                             |Literal("++")("upperappogiatura")
+                             |Literal("--")("lowerappogiatura")
+                             |Literal("=+")("uppermordent")
+                             |Literal("=-")("lowermordent")
+                             |Literal("=+=-")("uppergruppetto")
+                             |Literal("=-=+")("lowergruppetto")
+                             |Literal("=+*")("uppertrill")
+                             |Literal("=-*")("lowertrill")
+                             |Literal("=~~++")("strongupperpitchbend")
+                             |Literal("=~~+")("weakupperpitchbend")
+                             |Literal("=~~--")("stronglowerpitchbend")
+                             |Literal("=~~-")("weaklowerpitchbend")
+                             |Literal("=~~+*")("strongtremolo")
+                             |Literal("=~~-*")("weaktremolo")
+                             |Literal("=~~!!")("strongmodulationincrease")
+                             |Literal("=~~!")("weakmodulationincrease")
+                             |Literal("=~~??")("strongmodulationdecrease")
+                             |Literal("=~~?")("weakmodulationdecrease")
+                             |Literal("=~~!*")("strongvibrato")
+                             |Literal("=~~?*")("weakvibrato")
+                             |OneOrMore(Pitch)("explicitgracenote")
+                             |(OneOrMore(Pitch)("explicittremolo")+Suppress(Literal("*")))
+                             )
+                        +Suppress("\\")
+                         )
+        
+        timealteration = Literal("\"") | Literal("'") |OneOrMore(Word(nums))
+
         Note = ((Optional(Alteration)("noteAlteration")
                 + (Pitch |Literal("@"))("note")
-                + Optional(NoteOrnaments)("noteOrnament")
+                + Optional(NoteOrnament)("noteOrnament")
                 )
-                 + Group(Optional(OneOrMore(ToneRepetition)))("timeAlteration")
-                 + Optional(repetition)("noteRepetition")
+                 + Group(Optional(OneOrMore(timealteration)))("timeAlteration")
+                 + Optional(repetition("noteRepetition"))
                  ).setWhitespaceChars("")
         Notes = OneOrMore(Note.setResultsName("Notes",True))
         NotesGroup = Group(Optional(Alteration)
@@ -169,12 +202,14 @@ Nb Voices:{0.nbVoices}""".format(self)
 
         TimeEl = Notes|NotesGroup
 #==============================================
+        #parsing en deux temps
         CRN = OneOrMore(Word(printables, excludeChars="\n [ ] / "))
         
         BEATS = Optional(";") + Word(alphas) + Optional(";")
 
         group =  nestedExpr("(",")",CRN)
 
+        BarOrnaments = oneOf('| :| |: :|: 1 2 N $ @ >$ <$ <@ >@')# non
         #SPLIT/MERGE LINE
         BarBasedNotation = Group(
             Suppress(Optional("/"))+
@@ -182,7 +217,7 @@ Nb Voices:{0.nbVoices}""".format(self)
                 Group(
                     Optional(OneOrMore(Alteration+Suppress("/")))("barAlt")
                 +Group(Group(CRN)).setResultsName("barcontent")
-                +Optional(Suppress("/")+repetition)("barRep")
+                +Optional(Suppress("/")+repetition("barRep"))
                 +Suppress(Optional("/"))
                 ).setWhitespaceChars(""))
             ).setResultsName("bars")
@@ -191,7 +226,7 @@ Nb Voices:{0.nbVoices}""".format(self)
                 OneOrMore(Group(
                     Optional(OneOrMore(Alteration))("barAlt")
                     +nestedExpr("[","]",CRN).setResultsName("barcontent")
-                    +Optional(repetition)("barRep")
+                    +Optional(repetition("barRep"))
                     ))).setResultsName("bars")
                 
         splitmergecontent = BarBasedNotation |PhraseBasedNotation # |GroupBasedNotation
@@ -236,8 +271,10 @@ Nb Voices:{0.nbVoices}""".format(self)
              + infoValue("value"))
             |Suppress(Optional(pythonStyleComment))
             )
-
-        #save file infos, suppress comments on start of line, splits blocs
+        
+    #MAIN PARSE LOOP============================================================
+        #parsing lines one by one
+        #separate comments from infolines, stores infolines and voice blocs
         infolines = []
         i=0
         voices = []
@@ -245,11 +282,14 @@ Nb Voices:{0.nbVoices}""".format(self)
         numBloc = -1
         for line in self.__file.splitlines():
             if line != "":
-                if line[0] == "#": #info or comment if parse succeed stores infos otherwise ignores it (this was a comment)
+                if line[0] == "#":
+                    #info or comment if parse succeed stores infos
+                    #otherwise ignores it (this was a comment)
                     inf = InfoLine.parseString(line)
                     if inf.keyWord and inf.value:
                        infolines += [inf.asDict()]
-                elif line[0] == "O": #new voice bloc, creates a new entry in the voices list
+                elif line[0] == "O":
+                    #new voice bloc, creates a new entry in the voices list
                     try :
                         res = voiceLineHeader.parseString(line)
                     except:
@@ -263,12 +303,16 @@ Nb Voices:{0.nbVoices}""".format(self)
                     numBloc+=1
                     if res.name == "global":
                         if globalVoiceId != None :
-                            raise ValueError("There must only be one global bloc line%i"%(i))
+                            raise ValueError(
+                                "There must only be one global bloc line%i"%(i)
+                                )
                         globalVoiceId = numBloc
                     
                 elif line[0] in "|,:,>,<,=".split(","):
                     if voices[numBloc].name == "global" and line[0]!="=" :
-                        raise ValueError("You must only declare dataLines (\"=\") onto global Blocs at line%i"%(i))
+                        raise ValueError(
+                            "You must only declare dataLines into global at line%i"%(i)
+                            )
 
                     if line[0] == "|" :   # splitline
                         try :
@@ -283,7 +327,10 @@ Nb Voices:{0.nbVoices}""".format(self)
 
                         #parsing bars
                         for i in range(len(res.content)):    
-                            res.content[i].barcontent = [TimeEl.parseString(timel) for timel in res.content[i].barcontent[0]]      
+                            res.content[i].barcontent = [
+                                TimeEl.parseString(timel)
+                                for timel in res.content[i].barcontent[0]
+                                ]      
                                     
                     elif line[0] == ":" :   # mergeline
                         try :
@@ -297,7 +344,10 @@ Nb Voices:{0.nbVoices}""".format(self)
                         voices[numBloc].lines+=[res]
                         #parsing bars
                         for i in range(len(res.content)):    
-                            res.content[i].barcontent = [TimeEl.parseString(timel) for timel in res.content[i].barcontent[0]]
+                            res.content[i].barcontent = [
+                                TimeEl.parseString(timel)
+                                for timel in res.content[i].barcontent[0]
+                                ]
                             
                     elif line[0] == "=" :   # dataline
                         try :
@@ -332,7 +382,8 @@ Nb Voices:{0.nbVoices}""".format(self)
                         res.fileLine = i
                         voices[numBloc].lines+=[res]                        
                 else :
-                    raise ValueError("Expected one of \"#, O, |, :, >, < =\", got %c at line %i"%(line[0], i))
+                    raise ValueError(
+                        "Expected one of \"#,O,|,:,>,<,=\", got %c at line %i"%(line[0], i))
             i+=1
         GlobalBloc = None
         if globalVoiceId != None:
@@ -423,12 +474,12 @@ infosong = r"""
 O global \$-C5:C\%72:4\?%\!!!!\mezzo forte\=       #wahoo
 
 # there's still work to do
-O barbasednotation \$-C4:C\%72~120\?%\!!!\=~~@\mezzo forte\=\?9  #perfs without closing antislash rocks
-| /!/C>D*EC /*******/EF\>\ G /*59
+O barbasednotation \$-C4:C\%72~120\?%\!!!\=~~@\mezzo forte\=\?9 #perfs without closing antislash rocks
+| /!/C*9\>\D*E\>>\C /*******/EF\>\ G /*59
 : /C GEC/
 
 O phrasebasednotation \$C4:C\%72:4\?%\?%   
-| [CGEC] [C GEC]
+| [CGEC] [C** GEC]
 
 O barbasednotation
 | /CGEC/
@@ -461,18 +512,16 @@ O piano \$C5\%120:4\
 if __name__ == "__main__":
     parsed = AMNFileParser(infosong)
     print(parsed)
-    print(parsed.Voices[0].perfs.asDict())
-    print(parsed.Voices[0].perfs.factorpiano)
-    
-    print(parsed.Voices[0].perfs.SSIG.IPN.sign)
-    print(parsed.Voices[0].perfs.SSIG.IPN.pitch)
-    print(parsed.Voices[0].perfs.SSIG.IPN.octave)
-    print(parsed.Voices[0].perfs.BSIG.BPM)
-    print(parsed.Voices[0].perfs.BSIG.dynamic)
-    print(parsed.Voices[0].lines[0].type)
-    for bar in parsed.Voices[0].lines[0].content:
-        print("Bar repetition :",bar.barRep)
-        print("Bar alteration :",bar.barAlt)
-        for timel in bar.barcontent:
-            for note in timel.Notes:
-                print("note",note.note,"alteration",note.noteAlteration,"ornament",note.noteOrnament,"repetition",note.noteRepetition,"timealteration",note.timeAlteration)
+    for voice in parsed.Voices:
+        for bar in voice.lines[0].content:
+            print("Bar repetition :",bar.barRep)
+            print("Bar alteration :",bar.barAlt)
+            for timel in bar.barcontent:
+                for note in timel.Notes:
+                    if note.noteOrnament :
+                        print("note ornament",note.noteOrnament.asDict())
+                    if note.noteRepetition:
+                        print("note rep",note.noteRepetition)
+                        print(note.repsuite)
+                        print(note.repfactor)
+              

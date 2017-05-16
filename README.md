@@ -1,7 +1,6 @@
 # AMN-python-parser
 
 ASCII Music Notation parser to MIDI - Projet de TER 2017
----
 ### Structure des voix
 
 voices: *list*:
@@ -43,15 +42,49 @@ voices: *list*:
 				* [*parseResult*:
 					* .barAlt:*parseResult*
 					* .barRep : *parseResult*
+						* .repsuite : *["\*,\*,.."] or ""*
+						* .repfactor : *str(int) or ""*
 					* .barcontent : *list*
 						* [*parseResult*:
 							* .Notes : *list*
 								* [*parseResult*
-									* .note
+									* .note : *str [A-G]*
 									* .noteRepetition : *parseResult*
+										* .repsuite : *["\*,\*,.."]*
+										* .repfactor : *str(int) or ""*
 									* .noteAlteration : *parseResult*
-									* .noteOrnament : *parseResult*
 									* .noteTimeAlteration : *parseResult*
+									* .noteOrnament : *parseResult*
+										* .leftshortsyncopa : *"<" or ""*
+										* .rightshortsyncopa : *">" or ""*
+										* .leftlongsyncopa : *"<<" or ""*
+										* .rightlongsyncopa : *">>" or ""*
+										* .upperacciaccatura : *"+" or ""*
+										* .loweracciaccatura : *"-" or ""*
+										* .upperdoubleacciaccatura : *"+-" or ""*
+										* .lowerdoubleacciaccatura : *"-+" or ""*
+										* .upperappogiatura : *"++" or ""*
+										* .lowerappogiatura : *"--" or ""*
+										* .uppermordent : *"=+" or ""*
+										* .lowermordent : *"=-" or ""*
+										* .uppergruppetto : *"=+=-" or ""*
+										* .lowergruppetto : *"=+\*" or ""*
+										* .uppertrill : *"=-\*" or ""*
+										* .lowertrill : *"=-=+" or ""*
+										* .strongupperpitchbend : *"=~~++" or ""*
+										* .weakupperpitchbend : *"=~~+" or ""*
+										* .stronglowerpitchbend : *"=~~--" or ""*
+										* .weaklowerpitchbend : *"=~~+\*" or ""*
+										* .strongtremolo : *"=~~-\*" or ""*
+										* .weaktremolo : *"=~~-" or ""*
+										* .strongmodulationincrease : *"=~~!!" or ""*
+										* .weakmodulationincrease : *"=~~!" or ""*
+										* .strongmodulationdecrease : *"=~~??" or ""*
+										* .weakmodulationdecrease : *"=~~!\*" or ""*
+										* .strongvibrato : *"=~~?\*" or ""*
+										* .weakvibrato : *"=~~?" or ""*
+										* .explicitgracenote *"[A-G]"*
+										* .explicittremolo *"[A-G]"*
 								* ]
 						* ]
 				* ]
