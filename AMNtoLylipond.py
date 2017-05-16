@@ -34,7 +34,15 @@ O voixquatre \$B3\
 | E"' E / E"' E / G'>B' A' / E' F"' / E"' E / E"' E / E"' D / E /
 | E"' E' / G"' G' / B"' B' / E"' E' / G"' G' / G"' D' / E'B"' / E
 """
+Remplie=r"""#title=Remplis ton verre vide
+#author=Etienne Daniel
+#Chanson à deux voix d'après une chanson à boire de XVIIe s
 
+O global \$ F : D \% 208 : 8\
+
+O voice1
+| @"" A / D'D C'B / A" A'A*3 / G'F E'A / F"" F /*4
+|  / F'F** E'D / A'A A'A /***/ BCD DEC / D"""
 Imagine = r"""
 
 #title = Imagine
@@ -82,7 +90,7 @@ class AMNtoLylipond(AMNFileParser):
         
         fichier = open(str(self.title)+".ly", "w")
         text = '\header {\n'
-        self.__dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g'}
+        self.__dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g','@':'r'}
         dico_dyn_alteration = {'!': '^', '?': '+', '.': '.', '_': '-'}
         i = 0
         dic = {self.title: "title", self.subtitle: "subtitle", self.musicauthor: "composer",
@@ -122,21 +130,25 @@ class AMNtoLylipond(AMNFileParser):
                 text += voice.name + supplement+ '=' + relative + '{' + clef
                 newStaff+=voice.name + supplement
                 for bar in lines.content:
-                    #if bar.barRep:
-                        #newStaff += 'set countPercentRepeats = ##t \n' + r'\repeat percent ' + str(len(bar.barRep) + 1) + '{ \\' + voice.name + supplement + '}'
-                    #else:
-                        #newStaff+= voice.name + supplement + ' '
                     bartext=''
                     for barelem in bar.barcontent:
                         for notes in barelem.Notes:
                             bartext+=' '+self.__dico_note[notes.note] + ' '
                             if notes.noteRepetition:
-                                for i in range(len(notes.noteRepetition)):
+                                if notes.repfactor:
+                                    nb_rep=int(notes.repfactor)-1
+                                else:
+                                    nb_rep=len(notes.noteRepetition)
+                                for i in range(nb_rep):
                                     bartext+=' '+self.__dico_note[notes.note] + ' '
                             if notes.noteAlteration:
                                 pass
                     if bar.barRep:
-                        text += r'\repeat percent' +str(len(bar.barRep)) +'{'+bartext + '} '
+                        if bar.repfactor:
+                            nb_rep=int(bar.repfactor)
+                        else:
+                            nb_rep=len(bar.barRep)+1
+                        text += r'\repeat percent' + str(nb_rep)+'{'+bartext + '} '
                     else:
                         text += bartext
                     i += 1
@@ -180,4 +192,4 @@ class AMNtoLylipond(AMNFileParser):
 
 
 
-AMNtoLylipond(FJ)
+AMNtoLylipond(Remplie)
