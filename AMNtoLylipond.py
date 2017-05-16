@@ -88,8 +88,8 @@ class AMNtoLylipond(AMNFileParser):
         self.translate()
     def translate(self):
         
-        fichier = open(str(self.title)+".ly", "w")
-        text = '\header {\n'
+        #fichier = open(str(self.title)+".ly", "w")
+        header = '\header {\n'
         self.__dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g','@':'r'}
         dico_dyn_alteration = {'!': '^', '?': '+', '.': '.', '_': '-'}
         i = 0
@@ -97,23 +97,36 @@ class AMNtoLylipond(AMNFileParser):
                self.fileauthor: "arranger", self.lyricsauthor: 'poet'}
         for param in dic:
             if param:
-                text += dic[param] + '="' + param + '" \n'
+                header += dic[param] + '="' + param + '" \n'
             i += 1
-        text += '}\n'
-        fichier.write(text)
-        fichier.close()
+        
+        #fichier.write(text)
+        #fichier.close()
         score=''
+        text = ''
         clef=''
         relative=''
         #global
         if self.Global.perfs.SSIG:
             clef,relative=self.convert_perfs(self.Global.perfs.SSIG)
-
+        
+        BPM = self.Global.perfs.BSIG.BPM
+        header += 'meter = "' + str(BPM) + '"\n'
+        
         for voice in self.Voices:
             newStaff = ''
             merge1 = merge2 = ''
             i=0
-            newStaff+=r'\new Staff { '
+            for lines in voice.lines:
+                BPB = 0
+                for bar in lines.content:
+                    BPB = max(BPB, len(bar[0][0]))
+                    pulse = 0
+                    for elems in bar[0][0]:
+                        for elem in elems:
+                            pulse += 2 if elem == '"' else 1
+                    time = str(pulse) + "/" + str(BPB)
+            newStaff += r'\new Staff { \time' + str(time)
             #perfs
             if voice.perfs:
                 if voice.perfs.SSIG: clef, relative = self.convert_perfs(voice.perfs.SSIG)
@@ -157,7 +170,8 @@ class AMNtoLylipond(AMNFileParser):
             score+=newStaff
         score='<<'+score+'>>'
         text+=score
-        print(text)
+        header += '}\n'
+        print(header + text)
     def convert_perfs(self,ssig):
         clef=''
         relative=''
