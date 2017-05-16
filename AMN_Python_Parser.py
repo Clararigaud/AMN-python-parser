@@ -36,9 +36,8 @@ Nb Voices:{0.nbVoices}""".format(self)
         """ Return a tuple (list, PyParsing.ParseResult object) """
         com = pythonStyleComment
 
-    #PERFS======================================================================
-        
-        #BEAT SIGNATURE=========================================================       
+    #PERFS==================================================================================
+        #BEAT SIGNATURE=====================================================================       
         INT = Word(nums)
         PATTERN = Optional(oneOf(":  ")) + INT 
         SBEAT = Word(nums)
@@ -53,8 +52,7 @@ Nb Voices:{0.nbVoices}""".format(self)
                + Optional(Literal(':')
                           + (SBEAT | CBEAT))("BEAT")
                )
-        
-        #SCALE SIGNATURE========================================================
+        #SCALE SIGNATURE====================================================================
         Sign = oneOf('+ -')
         
         Key = Optional(Sign) + (Word(srange("[A-G]"),exact=1)("MAJOR")
@@ -82,8 +80,7 @@ Nb Voices:{0.nbVoices}""".format(self)
                 + Optional(Suppress(Literal(':'))
                            + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE")
                 )
-
-        #GLOBALVOICEPERFS=======================================================        
+        #GLOBALVOICEPERFS===================================================================        
         GlobalVoicePerf = (
             
                 (
@@ -132,137 +129,152 @@ Nb Voices:{0.nbVoices}""".format(self)
                      ).setResultsName("volumealteration",True)
                  ).setWhitespaceChars("")) 
 
-  #ALTERATIONS =================================================================
-        DYNAMICALT = oneOf("! ? . _ :")
-        PITCHALT = oneOf("+ - > < ~")
-        ALT = DYNAMICALT("dynamic") | PITCHALT("pitch")
-        strength = (Optional(Word(nums))+ "%") | "0"
-        Alteration = Group(OneOrMore(ALT) + Optional(strength))
+  #ALTERATIONS =============================================================================
+        strength = (Optional(Word(nums))+ Optional(Literal("%")))
+        DYNAMICALT = (OneOrMore(Literal("!"))
+                      |OneOrMore(Literal("?"))
+                      |OneOrMore(Literal("."))
+                      |OneOrMore(Literal("_"))
+                      |OneOrMore(Literal(":"))
+                      
+                      )("alt")+ Optional(strength)("strength")
+        PITCHALT = (OneOrMore(Literal("+"))
+                      |OneOrMore(Literal("-"))
+                      |OneOrMore(Literal(">"))
+                      |OneOrMore(Literal("<"))
+                      |OneOrMore(Literal("~"))
+                      )("alt")+ Optional(strength)("strength")
 
-  #REPETITION ==================================================================
+        Alteration = (
+            (DYNAMICALT("dynamic"))
+             |(PITCHALT("pitch")) 
+            )
+  #REPETITIONS =============================================================================
         repetition = (
             (Suppress(Literal("*"))+Word(nums)("repfactor"))
             | Group(OneOrMore("*"))("repsuite")
             )
-        
-  #CHORDS ======================= NOT OK =======================================
+  #CHORDS ======================= NOT OK ===================================================
         #Chords Notations CCN and ECN to be done
         ChordsOrnaments = oneOf('-+ +- -~+ +~- -~~+ +~~-')
         
-  #NOTES =======================================================================
-        NoteOrnament = (Suppress("\\")
-                         + (
-                             Literal("<")("leftshortsyncopa")
-                             |Literal(">")("rightshortsyncopa")
-                             |Literal("<<")("leftlongsyncopa")
-                             |Literal(">>")("rightlongsyncopa")
-                             |Literal("+")("upperacciaccatura")
-                             |Literal("-")("loweracciaccatura")
-                             |Literal("+-")("upperdoubleacciaccatura")
-                             |Literal("-+")("lowerdoubleacciaccatura")
-                             |Literal("++")("upperappogiatura")
-                             |Literal("--")("lowerappogiatura")
-                             |Literal("=+")("uppermordent")
-                             |Literal("=-")("lowermordent")
-                             |Literal("=+=-")("uppergruppetto")
-                             |Literal("=-=+")("lowergruppetto")
-                             |Literal("=+*")("uppertrill")
-                             |Literal("=-*")("lowertrill")
-                             |Literal("=~~++")("strongupperpitchbend")
-                             |Literal("=~~+")("weakupperpitchbend")
-                             |Literal("=~~--")("stronglowerpitchbend")
-                             |Literal("=~~-")("weaklowerpitchbend")
-                             |Literal("=~~+*")("strongtremolo")
-                             |Literal("=~~-*")("weaktremolo")
-                             |Literal("=~~!!")("strongmodulationincrease")
-                             |Literal("=~~!")("weakmodulationincrease")
-                             |Literal("=~~??")("strongmodulationdecrease")
-                             |Literal("=~~?")("weakmodulationdecrease")
-                             |Literal("=~~!*")("strongvibrato")
-                             |Literal("=~~?*")("weakvibrato")
-                             |OneOrMore(Pitch)("explicitgracenote")
-                             |(OneOrMore(Pitch)("explicittremolo")+Suppress(Literal("*")))
-                             )
-                        +Suppress("\\")
+  #NOTES ===================================================================================
+        NoteOrnament = ( #mystery capte certains elements et d'autres non. Je comprend pas. 
+                         Literal("<")("leftshortsyncopa")
+                         |Literal(">")("rightshortsyncopa")
+                         |Literal("<<")("leftlongsyncopa")
+                         |Literal(">>")("rightlongsyncopa")
+                         |Literal("+")("upperacciaccatura")
+                         |Literal("-")("loweracciaccatura")
+                         |Literal("+-")("upperdoubleacciaccatura")
+                         |Literal("-+")("lowerdoubleacciaccatura")
+                         |Literal("++")("upperappogiatura")
+                         |Literal("--")("lowerappogiatura")
+                         |Literal("=+")("uppermordent")
+                         |Literal("=-")("lowermordent")
+                         |Literal("=+=-")("uppergruppetto")
+                         |Literal("=-=+")("lowergruppetto")
+                         |Literal("=+*")("uppertrill")
+                         |Literal("=-*")("lowertrill")
+                         |Literal("=~~++")("strongupperpitchbend")
+                         |Literal("=~~+")("weakupperpitchbend")
+                         |Literal("=~~--")("stronglowerpitchbend")
+                         |Literal("=~~-")("weaklowerpitchbend")
+                         |Literal("=~~+*")("strongtremolo")
+                         |Literal("=~~-*")("weaktremolo")
+                         |Literal("=~~!!")("strongmodulationincrease")
+                         |Literal("=~~!")("weakmodulationincrease")
+                         |Literal("=~~??")("strongmodulationdecrease")
+                         |Literal("=~~?")("weakmodulationdecrease")
+                         |Literal("=~~!*")("strongvibrato")
+                         |Literal("=~~?*")("weakvibrato")
+                         |OneOrMore(Pitch)("explicitgracenote")
+                         |(OneOrMore(Pitch)("explicittremolo")
+                           +Suppress(Literal("*")))
                          )
         
         timealteration = Literal("\"") | Literal("'") |OneOrMore(Word(nums))
 
-        Note = ((Optional(Alteration)("noteAlteration")
+        Note = (Optional(OneOrMore(Alteration))("noteAlteration")
                 + (Pitch |Literal("@"))("note")
-                + Optional(NoteOrnament)("noteOrnament")
-                )
-                 + Group(Optional(OneOrMore(timealteration)))("timeAlteration")
-                 + Optional(repetition("noteRepetition"))
-                 ).setWhitespaceChars("")
+                + Optional(Suppress(Literal("\\"))+NoteOrnament("noteOrnament")+Suppress(Literal("\\")))
+                +(Optional(OneOrMore(timealteration))("timeAlteration"))
+                + Optional(repetition("noteRepetition"))
+                ).setWhitespaceChars("")
         Notes = OneOrMore(Note.setResultsName("Notes",True))
         NotesGroup = Group(Optional(Alteration)
                         +  nestedExpr("(",")",Notes)
                         + Optional(repetition)).setWhitespaceChars("")
 
         TimeEl = Notes|NotesGroup
-#==============================================
+
         #parsing en deux temps
         CRN = OneOrMore(Word(printables, excludeChars="\n [ ] / "))
-        
         BEATS = Optional(";") + Word(alphas) + Optional(";")
 
+# BARS =====================================================================================
+    #ORNAMENTS ==================== NOT DONE ===============================================
         group =  nestedExpr("(",")",CRN)
-
         BarOrnaments = oneOf('| :| |: :|: 1 2 N $ @ >$ <$ <@ >@')# non
-        #SPLIT/MERGE LINE
+    #BAR BASED NOTATION ====================================================================
         BarBasedNotation = Group(
             Suppress(Optional("/"))+
             OneOrMore(
                 Group(
                     Optional(OneOrMore(Alteration+Suppress("/")))("barAlt")
                 +Group(Group(CRN)).setResultsName("barcontent")
+                    #ornament
                 +Optional(Suppress("/")+repetition("barRep"))
                 +Suppress(Optional("/"))
                 ).setWhitespaceChars(""))
-            ).setResultsName("bars")
-
+            ).setResultsName("bars")   
+    #PHRASE BASED NOTATION =================================================================
         PhraseBasedNotation = Group(
                 OneOrMore(Group(
                     Optional(OneOrMore(Alteration))("barAlt")
                     +nestedExpr("[","]",CRN).setResultsName("barcontent")
+                    #ornament
                     +Optional(repetition("barRep"))
                     ))).setResultsName("bars")
-                
+    #LINES =================================================================================                
+        #SPLIT & MERGE =====================================================================
         splitmergecontent = BarBasedNotation |PhraseBasedNotation # |GroupBasedNotation
-
         SplitLine = (Suppress(Literal("|"))
                      + splitmergecontent.setResultsName("content")
                      + Suppress(Optional(pythonStyleComment)))
-
         MergeLine = (Suppress(Literal(":"))
                      + splitmergecontent.setResultsName("content")
                      + Suppress(Optional(pythonStyleComment)))
-        
-        #DATALINE vars and funcs missing
-        
+        #DATALINE ==========================================================================
         #defPhraseTag = varName + "=" + phrase
         #callgroupetag = 
         #phrasetag = "[" + OneOrMore(BAR) + "]"
         #groupetag =  "(" + OneOrMore(BEATS) + ")"
-
         #DataLine = Literal("=")("lineId") + PERFS|OneOrMore(defPhraseTag)|OneOrMore(defGroupTag)|OneOrMore(defPhraseMacro)|OneOrMore(defGroupMacro)
         DataLine = (Suppress(Literal("="))
                     + PERFS("perfs")
-                    + Suppress(Optional(pythonStyleComment))) #-> revoir perfs (types de perfs spécifiques attendus)
-        
+                    + Suppress(Optional(pythonStyleComment)))
+        # LYRICS & CHORDS ==================================================================
         LyricsLine = Literal(">")("lineId") + Word(alphas)("lyrics")
         ChordsLine = Literal("<")("lineId") + Word(alphas)("chords")
-
-        #VOICE LINE HEADER (GLOBAL OR INSTRU)
+        #BLOC HEADER (GLOBAL OR INSTRU)=====================================================
         Instrument = Word(alphas)
         voiceLineHeader = (Suppress(Literal("O"))
                       + (Instrument("Instrument")|"global")("name")
-                      + Optional(PERFS)("perfs") + Suppress(Optional(pythonStyleComment))
+                      + (
+                          Optional(PERFS)("perfs")
+                          + Suppress(Optional(pythonStyleComment)))
                       )
-
-        #INFOLINE -> OK 
-        infoKeyWord = oneOf(["title","subtitle","merge","AMN","music author","file author","lyrics author"])
+        #INFOLINE ==========================================================================
+        infoKeyWord = oneOf(
+            ["title",
+             "subtitle",
+             "merge",
+             "AMN",
+             "music author",
+             "file author",
+             "lyrics author"
+             ])
         infoValue = Combine(OneOrMore(Word(alphanums+" éàè_-'ç.")))
         InfoLine = (
             (Suppress(Literal("#"))
@@ -271,8 +283,7 @@ Nb Voices:{0.nbVoices}""".format(self)
              + infoValue("value"))
             |Suppress(Optional(pythonStyleComment))
             )
-        
-    #MAIN PARSE LOOP============================================================
+    #MAIN PARSE LOOP========================================================================
         #parsing lines one by one
         #separate comments from infolines, stores infolines and voice blocs
         infolines = []
@@ -475,7 +486,7 @@ O global \$-C5:C\%72:4\?%\!!!!\mezzo forte\=       #wahoo
 
 # there's still work to do
 O barbasednotation \$-C4:C\%72~120\?%\!!!\=~~@\mezzo forte\=\?9 #perfs without closing antislash rocks
-| /!/C*9\>\D*E\>>\C /*******/EF\>\ G /*59
+| /!3/!9C8*9\>\D*E\>>\C /*******/EF\>\ G /*59
 : /C GEC/
 
 O phrasebasednotation \$C4:C\%72:4\?%\?%   
@@ -509,19 +520,33 @@ O piano \$C5\%120:4\
 : [CG CG CG CG] [CG CG -BG >C] [>%FC >%FC >%FC >%FC] [CG CG -BG >C] [>%GD >%GD >%FD >%FD] [CG CG -BG >C] #chord notation
 #est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
 """
+
+
+propre = r"""
+O voice
+| /!4/ !78>6C5 B'G9** /*145
+"""
 if __name__ == "__main__":
-    parsed = AMNFileParser(infosong)
+    parsed = AMNFileParser(propre)
     print(parsed)
     for voice in parsed.Voices:
         for bar in voice.lines[0].content:
+            print("\n",bar)
             print("Bar repetition :",bar.barRep)
             print("Bar alteration :",bar.barAlt)
             for timel in bar.barcontent:
                 for note in timel.Notes:
+                    print("->pitch",note.note)
+                    print(note.asDict())
                     if note.noteOrnament :
-                        print("note ornament",note.noteOrnament.asDict())
+                        print("note ornament: ",note.noteOrnament)
                     if note.noteRepetition:
                         print("note rep",note.noteRepetition)
-                        print(note.repsuite)
-                        print(note.repfactor)
+                        print("repsuite",note.repsuite)
+                        print("repfactor",note.repfactor)
+                    if note.noteAlteration:
+                        print("note alt",note.noteAlteration.asDict())
+                        print("  pitch alt ", note.pitch.alt, note.pitch.strength)
+                        print("  dynamic alt", note.dynamic.alt ,note.dynamic.strength)
+                    
               

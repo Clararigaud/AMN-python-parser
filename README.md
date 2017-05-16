@@ -40,7 +40,7 @@ voices: *list*:
 			* .type : "data" or "merge" or "split" or "chord" or "lyrics"
 			* .content : *list*
 				* [*parseResult*:
-					* .barAlt:*parseResult*
+					* .barAlt: *parseResult*
 					* .barRep : *parseResult*
 						* .repsuite : *["\*,\*,.."] or ""*
 						* .repfactor : *str(int) or ""*
@@ -53,6 +53,12 @@ voices: *list*:
 										* .repsuite : *["\*,\*,.."]*
 										* .repfactor : *str(int) or ""*
 									* .noteAlteration : *parseResult*
+										* .dynamic : * parseResult *
+											* .alt : "char"  
+											* .strenght : [] 
+										* pitch : * parseResult *
+											* .alt : "char"  
+											* .strenght : [] 
 									* .noteTimeAlteration : *parseResult*
 									* .noteOrnament : *parseResult*
 										* .leftshortsyncopa : *"<" or ""*
