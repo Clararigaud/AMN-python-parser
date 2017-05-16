@@ -65,13 +65,13 @@ Nb Voices:{0.nbVoices}""".format(self)
         Freq = "="+ Word(nums) + Optional(oneOf("' Hz"))
         Tone = Word(alphas)
         MPN = Word(nums) #entre 0 et 127 
-        IPN = Optional(Sign) + Pitch + Optional(Octave)
+        IPN = (Optional(Sign)("sign") + Pitch("pitch") + Optional(Octave)("octave")).setWhitespaceChars("")
         EOS = MPN("MPN") | IPN("IPN")
         Step = Tone + (Freq | Raise) + Lower + Raise + Degree
         CSCALE = Literal('[') + Step + Literal('$]')
         SSIG = Group(Suppress(Literal('$'))
-                + EOS("EOS")
-                + Optional(Literal(':')
+                + EOS
+                + Optional(Suppress(Literal(':'))
                            + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE")
                 )
 
@@ -368,10 +368,10 @@ infosong = r"""
 #this is a comment
 #AMN = 1.0
 
-O global \$C4:C\%72:4\?%\?%            #wahoo
+O global \$-C5:C\%72:4\?%\?%            #wahoo
 
 # there's still work to do
-O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
+O barbasednotation \$-C4:C\?% #perfs without closing antislash rocks
 | /!/C>D*EC /*******/EF\>\ G /*59
 : /C GEC/
 
@@ -395,6 +395,7 @@ O flute
 | /!/C>D*EC /*******/EF\>\ G /*59
 : /CGEC/CG EC/CGE C/
 """
+
 boogie = r"""
 #------------------------------------------------------------------------------------------------------------------------------------
 #title= Boogie
@@ -408,8 +409,11 @@ O piano \$C5\%120:4\
 if __name__ == "__main__":
     parsed = AMNFileParser(infosong)
     print(parsed)
-
-    print(parsed.Voices[0].name)
+    print(parsed.Voices[0].perfs.SSIG.MPN)
+    print(parsed.Voices[0].perfs.SSIG.IPN.asDict())
+    print(parsed.Voices[0].perfs.SSIG.IPN.pitch)
+    print(parsed.Voices[0].perfs.SSIG.IPN.octave)
+    print(parsed.Voices[0].perfs.SSIG.SCALE)
     print(parsed.Voices[0].lines[0].type)
     for bar in parsed.Voices[0].lines[0].content:
         print("Bar repetition :",bar.barRep)
