@@ -146,14 +146,18 @@ class AMNtoLylipond(AMNFileParser):
                     bartext=''
                     for barelem in bar.barcontent:
                         for notes in barelem.Notes:
-                            bartext+=' '+self.__dico_note[notes.note] + ' '
+                            nb = ''
+                            if notes[1] == "'":
+                                nb = str(pulse*2)
+                                bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
+                            elif notes[1] == '"':
+                                nb= str(pulse*4)
+                                bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
+                            else:
+                                bartext+=' '+ self.__dico_note[notes.note] + ' '
                             if notes.noteRepetition:
-                                if notes.repfactor:
-                                    nb_rep=int(notes.repfactor)-1
-                                else:
-                                    nb_rep=len(notes.noteRepetition)
-                                for i in range(nb_rep):
-                                    bartext+=' '+self.__dico_note[notes.note] + ' '
+                                for i in range(len(notes.noteRepetition)):
+                                    bartext+=' '+ self.__dico_note[notes.note] + ' '
                             if notes.noteAlteration:
                                 pass
                     if bar.barRep:
