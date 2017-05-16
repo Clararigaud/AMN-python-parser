@@ -35,9 +35,10 @@ Nb Voices:{0.nbVoices}""".format(self)
     def parseFile(self):
         """ Return a tuple (list, PyParsing.ParseResult object) """
         com = pythonStyleComment
-        #BSIG
-        BPM = OneOrMore(Word(nums))
-        dynamicBPM = BPM + "~" + BPM
+
+    #PERFS======================================================================
+        
+        #BEAT SIGNATURE=========================================================       
         INT = Word(nums)
         PATTERN = Optional(oneOf(":  ")) + INT 
         SBEAT = Word(nums)
@@ -45,16 +46,17 @@ Nb Voices:{0.nbVoices}""".format(self)
                  + (PATTERN | (Literal('/')+PATTERN) | (Literal(' ')+PATTERN))
                  + Suppress(Literal(']'))
                  )
+        
+        BPM = Word(nums)
         BSIG= (Suppress(Literal('%'))
-               + Optional(BPM| dynamicBPM)
+               + Optional(BPM("BPM") + Optional( Suppress("~") + BPM("dynamic")))
                + Optional(Literal(':')
-                          + (SBEAT | CBEAT))
+                          + (SBEAT | CBEAT))("BEAT")
                )
-
-        #SSIG a l'air OK
-        Octave = oneOf('<< < > >>')|Word(srange("[0-9]"),exact=1)
-        Pitch = Word(srange('[A-G]'),exact=1)
+        
+        #SCALE SIGNATURE========================================================
         Sign = oneOf('+ -')
+        
         Key = Optional(Sign) + (Word(srange("[A-G]"),exact=1)("MAJOR")
                                 | Word(srange("[a-g]"),exact=1)("MINOR"))
         Fifth = '0' | Sign + Word(srange("[1-7]"),exact=1)
@@ -64,18 +66,37 @@ Nb Voices:{0.nbVoices}""".format(self)
         Raise = OneOrMore("+") + Optional(Optional(Word(nums) | "%"))
         Freq = "="+ Word(nums) + Optional(oneOf("' Hz"))
         Tone = Word(alphas)
-        MPN = Word(nums) #entre 0 et 127 
-        IPN = (Optional(Sign)("sign") + Pitch("pitch") + Optional(Octave)("octave")).setWhitespaceChars("")
-        EOS = MPN("MPN") | IPN("IPN")
         Step = Tone + (Freq | Raise) + Lower + Raise + Degree
         CSCALE = Literal('[') + Step + Literal('$]')
+
+        Pitch = Word(srange('[A-G]'),exact=1)
+        Octave = oneOf('<< < > >>')|Word(srange("[0-9]"),exact=1)        
+        MPN = Word(nums) #entre 0 et 127 
+        IPN = (Optional(Sign)("sign")
+               + Pitch("pitch")
+               + Optional(Octave)("octave")
+               ).setWhitespaceChars("")
+        EOS = MPN("MPN") | IPN("IPN")
         SSIG = Group(Suppress(Literal('$'))
                 + EOS
                 + Optional(Suppress(Literal(':'))
                            + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE")
                 )
 
+        #GLOBALVOICEPERFS=======================================================
         GlobalVoicePerf = oneOf('% $ ! !! !!! !N ? ?? ??? ?N !% ?% ?~! !~? ?~~! !~~? @~= =~@ @~~= =~~@ =') # non
+
+
+        PERFS = ( # ordre classique clé/tempo/ "décorateurs"
+            Suppress("\\")
+            +(
+                Optional(SSIG.setResultsName("SSIG")+Suppress(Optional("\\")))
+                 + Optional(BSIG+Suppress(Optional("\\")))("BSIG")
+                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\")))("voiceperfs")
+                 ).setWhitespaceChars("")) 
+
+    #===========================================================================
+
         BarOrnaments = oneOf('| :| |: :|: 1 2 N $ @ >$ <$ <@ >@')# non
 
 #=========================================================
@@ -86,11 +107,7 @@ Nb Voices:{0.nbVoices}""".format(self)
         ChordsOrnaments = oneOf('-+ +- -~+ +~- -~~+ +~~-')
 
         #ECN = Chords Notations CCN and ECN to be done
-        PERFS = Suppress("\\") +(
-            Optional(SSIG.setResultsName("SSIG") +Suppress(Optional("\\")))
-                 + Optional(BSIG+Suppress(Optional("\\")))("BSIG")
-                 + ZeroOrMore(GlobalVoicePerf+Suppress(Optional("\\")))("voiceperfs")
-                 ).setWhitespaceChars("") # ordre classique clé/tempo/ "décorateurs"
+
         
         #ALTERATIONS
         DYNAMICALT = oneOf("! ? . _ :")
@@ -371,7 +388,7 @@ infosong = r"""
 O global \$-C5:C\%72:4\?%\?%            #wahoo
 
 # there's still work to do
-O barbasednotation \$-C4:C\?% #perfs without closing antislash rocks
+O barbasednotation \$-C4:C\%72~120\?% #perfs without closing antislash rocks
 | /!/C>D*EC /*******/EF\>\ G /*59
 : /C GEC/
 
@@ -410,10 +427,11 @@ if __name__ == "__main__":
     parsed = AMNFileParser(infosong)
     print(parsed)
     print(parsed.Voices[0].perfs.SSIG.MPN)
-    print(parsed.Voices[0].perfs.SSIG.IPN.asDict())
+    print(parsed.Voices[0].perfs.SSIG.IPN.sign)
     print(parsed.Voices[0].perfs.SSIG.IPN.pitch)
     print(parsed.Voices[0].perfs.SSIG.IPN.octave)
-    print(parsed.Voices[0].perfs.SSIG.SCALE)
+    print(parsed.Voices[0].perfs.BSIG.BPM)
+    print(parsed.Voices[0].perfs.BSIG.dynamic)
     print(parsed.Voices[0].lines[0].type)
     for bar in parsed.Voices[0].lines[0].content:
         print("Bar repetition :",bar.barRep)
