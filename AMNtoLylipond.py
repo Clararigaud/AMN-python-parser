@@ -7,12 +7,32 @@ from pyparsing import *
 import sys
 from AMN_Python_Parser import *
 FJ = r"""
-#title= Les lapins sont en vacances
-#music author = Dudulle
-O piano \$ B4:C\%120:4\
-| / .Ce,.Ce ,.Df,.Df / .Eg,.Eg ,_Eg / .Df,.Df ,.Eg,.Eg/ .Fa,.Fa ,_Fa/.>%Gb,.Fa ,.Eg/ .Eg,.Df ,.Ce /
-| /.Eg,.Df,.Ce,.Ce / .Bd,.Bd, _C/
-: /C >G / C /D A / D / >G G / AB C / G C / G C
+#title= Tourdion
+#subtitle= Quand je bois du vin clairet
+#author = Anonymous
+#parole de chanson à ajouter. Question pour Monsieur Schlick, le langage pour les paroles est-il le même que pour les notes? Ou osef, c'est juste visuel?
+#Quand on dit IPN = A4, si on fait un si(B) , ça donne le B5 ou le B4???
+#Si on indique la gamme dans les perfs, est-ce que les bémol/ dièses sont mis automatiquement sur la note quand elle est indiquée ou faut quand même les mettre à la main???
+#Le ternaire c'est chiant
+O global \$ D : D \% 104 : 2\
+
+O voixune
+|  / EFG AGF / E" FGA / BAG GAF / G' FED / EFG AGF / E' G' F' / E"' D' / E /
+:  / B" ABC / B"' B' / >ECBAGF / G" FE' / B" ABC / B'A BF' / E"' D' / E /
+:  / B" ABC /***/ B"' B' / >ECBAGF / G" FE' / B" ABC / B'A BF' / E"' D' / E /
+
+O voixdeux \$A4\
+|  / B"' B' / E"' E' / D"' E' / E'A / G"' E' / BAB CD' / B' B"' / B /
+:  / G"' G' / G"' G' / F"' F' / E"' E' / D"' D' / D"' D' / B' B"' / B /
+:  / G"' G' / G"' G' / F"' F' / E"' E' / D"' D' / D"' D' / B' B"' / B /
+
+O voixtrois \$E\
+|  / G"' E' / B"' B' / B"' -C' / B"' A' / B"' B' / G"' A' / B'F EF' / E
+| >E"' E / D"' D' / E"' E' /***/ B"' B' / B"' B' / B"' A' / B' F"' / E
+
+O voixquatre \$B3\
+| E"' E / E"' E / G'>B' A' / E' F"' / E"' E / E"' E / E"' D / E /
+| E"' E' / G"' G' / B"' B' / E"' E' / G"' G' / G"' D' / E'B"' / E
 """
 
 Imagine = r"""
@@ -43,12 +63,13 @@ O global \$C4:C\%72:4\?%\?%            #wahoo
 
 # there's still work to do
 O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
-| /AAAA/***
-| /BBBB/
+| /AAAA/***/BBBB/
+: /CGEC/
 : /CGEC/
 
 O phrasebasednotation
 | /ABC 
+: /ABC
 """
 
 
@@ -75,26 +96,29 @@ class AMNtoLylipond(AMNFileParser):
         fichier.close()
         score=''
         for voice in self.Voices:
-            merge = ''
+            newStaff = ''
+            merge1 = merge2 = ''
             i=0
-            score+=r'\new Staff { '
+            newStaff+=r'\new Staff { '
             for lines in voice.lines:
                 supplement=''
                 for j in range(i):
                     supplement+='a'
 
                 if lines.type == 'split':
-                    score += '\\'
+                    newStaff += '\\'
                 if lines.type == 'merge':
-                    score='<< '+score+'}\n '+ '\\new Staff { \\'
-                    merge='>>\n'
-                text += voice.name + supplement+ '='
+                    newStaff+='}\n '+ '\\new Staff { \\'
+                    merge1='<<'
+                    merge2='>>\n'
+                text += voice.name + supplement+ '=' + '{'
+                newStaff+=voice.name + supplement
                 for bar in lines.content:
-                    if bar.barRep:
-                        score += 'set countPercentRepeats = ##t \n' + r'\repeat percent ' + str(len(bar.barRep) + 1) + '{ \\' + voice.name + supplement + '}'
-                    else:
-                        score+= voice.name + supplement + ' '
-                    bartext='{'
+                    #if bar.barRep:
+                        #newStaff += 'set countPercentRepeats = ##t \n' + r'\repeat percent ' + str(len(bar.barRep) + 1) + '{ \\' + voice.name + supplement + '}'
+                    #else:
+                        #newStaff+= voice.name + supplement + ' '
+                    bartext=''
                     for barelem in bar.barcontent:
                         for notes in barelem.Notes:
                             bartext+=' '+dico_note[notes.note] + ' '
@@ -103,13 +127,14 @@ class AMNtoLylipond(AMNFileParser):
                                     bartext+=' '+dico_note[notes.note] + ' '
                             if notes.noteAlteration:
                                 pass
-
-                    text+=bartext + '} '
-                                 #donne un fichier bartext qui donne le contenu de la bar traduit
+                    if bar.barRep:
+                        text += r'\repeat percent' +str(len(bar.barRep)) +'{'+bartext + '} '
+                    else:
+                        text += bartext
                     i += 1
-                score+='\n'
-                text += '\n'
-            score+='}\n' +merge
+                text += '} \n'
+            newStaff=merge1+ newStaff+'}\n' +merge2
+            score+=newStaff
         text+=score
         print(text)
 
@@ -122,4 +147,4 @@ class AMNtoLylipond(AMNFileParser):
 
 
 
-AMNtoLylipond(infosong)
+AMNtoLylipond(FJ)
