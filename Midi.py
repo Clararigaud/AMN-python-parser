@@ -1,14 +1,26 @@
-from midiutil import MIDIFile
+try:
+    from midiutil import MIDIFile
+except ImportError:
+    print("\nmidiutil n'est pas installé")
+    try:
+        import pip
+        print("\nInstallation du module MIDIUtil")
+        pip.main(['install', "MIDIUtil"])
+    except:
+        print("failed")
+
 from AMN_Python_Parser import *
 import os
 test = r"""
 O piano
 | [CDEC][CDEC] [EF G][EF G] [G"A GF E C][G"A GF E C] [C<G C][C<G C] #frere jacques bitches
-: [EFGE][EFGE] [GA B][GA B] [B"C BH G E][B"C BH G E] [E<B E][E<B E]
+: [EFGE][EFGE] [GA B][GA B] [B"C BH G E][B"C BH G E] [E<B E][E<B E] #merge line synchro avec split lne
 
+# deuxieme voix
 O flute
 | [DEFD]
 
+#premiere voix à la suite de premiere instance (same track)
 O piano
 | [CCCD][E' D']
 : [EEEF][G' F']
