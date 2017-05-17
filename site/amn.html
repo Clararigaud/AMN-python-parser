@@ -37,20 +37,73 @@
 					# music author : John Lemon
 				</p>
 				<h4>Blocs</h4>
-				<p>Il y a deux types de blocs possible. Le bloc "global" et le bloc "voice" Le bloc global est constitué d'une unique ligne rédigée comme ci-dessous: <br/>
-				<p class="code"> </p>
+				<p>Il y a deux types de bloc possibles. Le bloc "global" et le bloc "voice" Le bloc global est constitué d'une unique ligne qui peut se rédiger comme ci-dessous: <br/>
+				<p class="code">o global \$ Tonalité : Gamme\ % Battements par minutes : Battements par mesures\</p><br/>
+				Cette ligne permet d'attribuer des paramètres généraux à toutes les voix. Elle n'est pas obligatoire, et on n'est pas obligés de préciser tous les paramètres.<br/><br/>
+				Le bloc "voice" est quant à lui un bloc contenant les paramètres, les portées et tout ce qu'elles contiennent, d'une voix ou d'un instrument.
+				Celle-ci se compose d'une ligne contenant les paramètres propres à la voix, et peut se noter de la matière suivante:<br/>
+				<p class="code">o nom instrument/voix \$ Tonalité : Gamme\ % Battements par minutes : Battements par mesures\</p><br/>
+				Celle-ci est structurée comme la ligne du bloc global. De même, elle n'est pas obligatoire, auquel cas les paramètres globaux s'appliquent. S'il n'y aucune indication des
+				paramètres, ceux-ci sont déterminés par défaut. 
+				<br/>Le bloc voice contient également les lignes contenant la musique en elle-même. Nous avons les Splits lignes, les Datalines, les Mergeslines, les Chordslines et les Lyricslines détaillées ci-dessous.
+				</p>
+				
 				<h4>Datalines</h4>
-				<p></p>
+				<p>Les datalines sont des ajouts de paramètres de hauteur, de rythme ou de nuances qui sont uniquement appliquées à toutes les lignes qui la suivent. Elles interviennent
+				si on a besoin de modifier la tonalité, la vitesse ou d'autres élements de la musique à partir d'un certain temps. Ces paramètres se structurent comme ci-dessus.
+				<br/> Les datalines permettent également d'ajouter des groupes de notes, des phrases ou des macro fonctions attribués à des variables. Ainsi, si on veut les réutiliser,
+				plutôt que de tout réecrire, on utilise directement le nom de la variable dans les Splitlines. Ces lignes commencent par le caractère "=".</p>
 				<h4>Splitlines</h4>
-				<p></p>
+				<p>Les Splitlines sont les lignes contenant les mesures. Elles commencent par le caractère "|". Deux lignes à la suite étant toutes deux des split lines seront
+				lues à la suite.</p>
 				<h4>Mergelines</h4>
-				<p></p>
+				<p>Les Mergelines sont des lignes s'écrivant éxactement comme des Splitlines, à la différence qu'elles commencent par ":" et qu'elles doivent être lues en même
+				temps que les Splitlines. Par exemple pour un bloc voice représentant une musique jouée par un Piano, on aura une Splitline décrivant la main droite, et une Mergeline
+				contenant la main gauche. Celles-ci seront ainsi jouées en même temps.</p>
 				<h4>Chordslines</h4>
-				<p></p>
+				<p>Les Chordslines sont des lignes contenant des accords. Celles-ci commencent par le caractère "<".</p>
 				<h4>Lyricslines</h4>
-				<p></p>
+				<p>Les Lyricslines sont des lignes contenant des paroles. Celles-ci commencent par le caractère ">".</p>
 				<h4>Mesures</h4>
-				<p></p>
+				<p>Les mesures peuvent être délimitées soit par des barres \ \ soit par des crochets []. Elles contiennent des notes dans la notation anglaise. A ces notes sont attribués
+				des altérations, comme les dièses ou les bémoles, ainsi que des ornements, qui sont tous représentés par des caractères bien précis. Les dièse, par exemple, s'écrivent "+"
+				et se situent devant la note. La rytmique est établie par le nombre d'unités de temps, séparées par des espaces, et par le nombre de notes dans ces unités de temps.
+				Certains symboles permettent d'appliquer des répétitions ou des ornements aux mesures elles-mêmes. Les répétitions par exemple, sont représentées par le symbole "*"
+				situé après les mesures, et on peut répéter la mesure autant de fois qu'on le désire.</p>
+				<h4>Avantages et Inconvéniants</h4>
+				<p>Le langage AMN est un langage qui permet à la fois une lecture de l'homme, et de la machine, ce qui n'est généralement pas le cas dans les autres langages.
+				En effet, ceux-ci nécessitent un transcodeur afin que l'individu puisse le comprendre sans difficultés. Il est de plus très adaptables, car il permet de rendre 
+				compte de toutes les formes de musiques, de la plus simple à la plus complexe. En outre, il a les mêmes méchanismes que certains langages, ce qui rend la traduction
+				plus facile. <br/><br/>
+				En revanche, de part son aspect "double lisibilité", le langage AMN est un langage peu visuel. Il faut donc une certaine période d'adaptation et d'apprentissage si l'on
+				veut pouvoir en saisir tous les aspects. Le système de rythmique est également assez compliqué à comprendre, car il est très peu visuel et il est nécessaire d'être familier 
+				avec lui pour pouvoir lire aisément. 
+				</p>
+				<h4>Exemple:</h4>
+				<p class="code">O  flute \$C6 # bar-based notation<br/>
+|  CDEC / * / EF G / * / G"A GF E C / * / C<G C  / *<br/>
+
+O  flute \$C6 # phrase-based notation<br/>
+|  [CDEC]* [EF G]* [G"A GF E C]* [C<G C]*<br/>
+
+O  flute \$C6 # add dynamics alteration<br/>
+|  :[CD_EC]* :[EF G]* [!G"A GF _E _C]* ![C<G C  / C<G C0]<br/>
+
+O  flute \$C6 # add chords<br/>
+|  :[CD_EC]* :[EF G]* [!G"A GF _E _C]* ![C<G C  / C<G C0]<br/>
+<   [CM]*     [Em.]*  [Dm.     CM.]*    [CM. CM / CM  C.M]<br/>
+
+O  vox \$C5 # add lyrics <br/>
+|  [C  ,D  ,E   ,C    ]* [E       ,F   ;G    ]*<br/>
+>  [Frè,re ,Ja  ,cques]* [dor     ,mez ;vous?]*<br/>
+>  [Are,you,slee,ping?]* [Bro     ,ther;John ]*<br/>
+>  [Bru,der,Ja  ,kob  ]* [Schläfst,du  ;noch?]*<br/>
+
+|  [G" ,A   ;G    ,F  ;E   ;C   ]* [C   ,<G  ;C   ]*<br/>
+>  [So ,nnez;les  ,ma ;ti  ;nes ]* [Ding,Dang;Dong]*<br/>
+>  [Mor,ning;bells,are;ring;ing ]* [Ding,Dang;Dong]*<br/>
+>  [Hörst,du;nicht,die;Gloc;ken?]* [Ding,Dang;Dong]*<br/></p>
+				</p>
 			</article>
 		</div>
 	</div>
