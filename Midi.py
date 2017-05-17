@@ -320,3 +320,10 @@ class Midi_Parser(AMNFileParser):
             gamme[pitch] = base
             i +=1
         return gamme
+
+parsed = Midi_Parser(test)
+filename = "lol.midi"
+os.system("stop "+filename)
+with open(filename, 'wb') as output_file:
+    parsed.midi.writeFile(output_file)
+#os.system("start "+filename)
