@@ -27,26 +27,92 @@
 		<h2 id ="pagetitle">Lilypond</h2>
 			<article>
 				<h3>Structure</h3>
-				<p>Le langage lylipond est un langage permettant de créer des partitions. 
+				<p>Le langage Lylipond est un langage permettant de créer des partitions. 
 				Il ressemble au langage html, car il utilise un système de balises. Les 
-				commandes s’écrivent sous la forme \commande et est suivie de balises comme <<   >> ou {   }.
+				commandes s’écrivent sous la forme \nomcommande et est suivie de balises comme <<   >> ou {   }. <br/>
+				Par exemple :<br/><br/>
+				\score{c'}<br/><br/>
+				Donne le fragment de partition suivant :<br/>
+				<img src='images/exemple1.PNG'><br/>
+				Ici, bien qu’on ait seulement indiqué qu’on voulait le cinquième do (ici écrit c’), 
+				la clé de sol et le C représentant la métrique 4/4 sont mis automatiquement. Lylipond
+				n’est donc pas un langage où l’on écrit tout manuellement, certaines choses se mettent à jour automatiquement. 
+			</article>
+			<article>
 					</p>
-				<h3>Structure</h3>
-				<p>Le langage lylipond est un langage permettant de créer des partitions. 
-				Il ressemble au langage html, car il utilise un système de balises. Les 
-				commandes s’écrivent sous la forme \commande et est suivie de balises comme <<   >> ou {   }.
+				<h3>Entête</h3>
+				<p>Le format Lylipond permet d'écrire proprement le titre, le sous-titre, le nom du
+				compositeur et du parolier, si le fichier AMN contient un ou plusieurs de ces élements.
+				Ces informations se situent dans l'entête.<br/>
+				L’entête d’un fichier Lilypond se définie par une commande header qui permet de donner les informations 
+				essentielles d’une partition de musique comme le titre, l’auteur, le tempo, …
+				<img src='images/exemple2.PNG'><br/>
 					</p>
 			</article>
 			<article>
-				<h3>Titre 2</h3>
-				<p>
-					blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
-				</p>
+				<h3>Notes</h3>
+				<p>Les notes, en AMN comme en Lylipond, sont dans la notation Anglaise. Les notes
+				sont donc toute représentées par des lettres allant de A à G. La seule différence 
+				entre le langage Lylipond et le langage AMN est qu'ils écrivent respectivement ces notes
+				en majuscule et en minuscule</p>
 			</article>
+			<article>
+				<h3>Altérations de notes</h3>
+				<p>Les Altérations de notes permettent de faire varier l’attaque avec laquelle on
+				joue la note, et de faire varier la hauteur de la note en ajoutant des dièses ou des
+				bémols, ainsi que des octaves et des demi-octaves. Chaque type d’altération à sa 
+				commande précise, et on les places devant ou derrière la note selon si c’est une
+				altération de la dynamique ou de la hauteur de ladite note.<br/><br/>
+				Le dièse, par exemple, s'écrit 'note is'. Si l'on veut écrire un mi dièse sur la partition, 
+				la note sera rédigée ainsi:<br/><br/>
+				eis<br/><br/>
+				Ce qui donnera le rendu suivant:<br/><img src='images/exemple5.PNG'><br/></p>
+			</article>
+			<article>
+				<h3>Clé et hauteur relative</h3>
+				<p>Pour chaque voix en AMN, il est possible de déterminer la tonalité des notes, en indiquant la note minimale. Le même principe existe en Lylipond grâce à la commande :<br/> <br/>
+\relative note { mélodie }<br/> <br/>
+La note indiqué donnera la note minimale, et toute note, sauf altération explicite, devra être plus aigüe qu’elle. 
+En revanche, le langage AMN ne donne pas la clé avec laquelle sont écrites les notes des mesures, car l’écriture anglaise avec des lettres permet de s’en passer. En revanche, cette clé est nécessaire en Lylipond, car si l’on se situe en clé de sol alors que nous avons une note très basse, celle-ci se trouvera hors de la portée et sera donc difficile à lire comme il suit :<br /> <br/>
+<img src='images/exemple3.PNG'><br/>
+Alors qu’avec une clé de fa, cela est plus intuitif.<br/>
+<img src='images/exemple4.PNG'><br/>
+Nous avons donc mis en place un système détectant si la tonalité des notes d’une voix est plus lisible en clé de fa ou en clé de sol. La clé de sol est mise en place automatiquement si aucune clé est indiquée. En revanche, la clé de fa doit être écrite manuellement si l’on veut qu’elle apparaisse.<br/>
+La clé de fa s’écrit de la manière suivante : <br /> <br/>
+\clef bass
+</p>
+			</article>
+			<article>
+				<h3>Rythme</h3>
+				<p>La notation des rythmes s'écrit en ajoutant un nombre derrière la note, qui indique sa nature.
+				Celle-ci se caractérise à partir de la ronde qui dure 4 temps sur 
+				une métrique 4/4. Par exemple, une noire vaut ¼ de ronde, alors qu’une blanche vaut
+				2/4 de ronde donc en reprenant l’exemple ci-dessus un c4 serait une noire, un c2
+				serait une blanche et un c16 serait une double croche.</p>
+			</article>
+			<article>
+				<h3>Nuances</h3>
+				<p>AMN nous donne la possibilité de donner le volume d’un morceau. Sur une partition, 
+				celui-ci se caractérise par des nuances qui se notent f pour forte, ff pour fortissimo,
+				p pour piano, pp pour piano etc. En AMN, nous avons la possibilité de rajouter autant de
+				f et de p qu’on veut, mais en Lylipond, le nombre maximum qu’on peut rajouter est de cinq. 
+				Si un individu veut donc un morceau très sonore, caractérisé par beaucoup de f, sa partition 
+				Lylipond lui affichera quand même cinq p ou f au maximum.</p>
+			</article>
+			<article>
+				<h3>Portées groupées et répétitions</h3>
+				<p>Pour un instrument à deux voix tel que le piano, AMN permet d’écrire une première
+				mélodie pour la main droite et une seconde pour la main gauche. En Lylipond, on peut
+				également assembler des portées à l’aide d’une accolade, dont la commande s’écrit :<br/><br/>\new GrandStaff<< \new Staff {voix une} \new Staff{voix deux}>> <br/><br/>
+				On peut également donner un nom à ce groupe de portées en ajoutant avant le premier \newStaff la commande:<br/><br/> 
+				\set GrandStaff.instrumentName =# "nom de l'instrument"<br/><br/>
+				
+				Le langage AMN nous donne la possibilité de répéter n fois une même mesure avec n 
+				choisie par celui qui écrit le fichier. Cela est compatible avec le langage Lylipond 
+				via la commande suivante :<br/><br/>
+				\repeat percent n { mesure à répeter}</p>
+			</article>
+			
 		</div>
 	</div>
 </body>
