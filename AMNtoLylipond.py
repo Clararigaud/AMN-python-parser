@@ -134,26 +134,31 @@ class AMNtoLylipond(AMNFileParser):
                 supplement=''
                 for j in range(i):
                     supplement+='a'
+                #Merge ou split
                 if lines.type == 'split':
                     newStaff += '\\'
                 if lines.type == 'merge':
                     newStaff+='}\n '+ '\\new Staff { \\'
                     merge1=r'\new GrandStaff<<\set GrandStaff.instrumentName = #"'+ voice.name+'" '
                     merge2='>>\n'
+                #Ajout de la hauteur des perfs locales ou globales
                 text += voice.name + supplement+ '=' + relative + '{' + clef
                 newStaff+=voice.name + supplement
+                #Parcours des mesures
                 for bar in lines.content:
                     bartext=''
+                    #Parcours des élements dans les mesures
                     for barelem in bar.barcontent:
+                        #Notes
                         for notes in barelem.Notes:
                             nb = ''
                             var=0
                             quart=0
                             alteration=''
                             newNote=''
+                            #Alterations
                             if notes.noteAlteration:
                                 if notes.noteAlteration.pitch:
-
                                     for alt in notes.noteAlteration.pitch.alt:
                                         if alt in ('+','-'):
                                             if alt=='+':var+=1
@@ -172,10 +177,8 @@ class AMNtoLylipond(AMNFileParser):
                                 if notes.noteAlteration.dynamic:
                                     for alt in notes.noteAlteration.dynamic.alt:
                                         alteration+= '-'+self.__dico_dyn_alt[alt]
-
-
-
                             if newNote=='':newNote=self.__dico_note[notes.note]
+                            #Rythme
                             if len(notes)>=2:
                                 if notes[1] == "'":
                                     nb = str(pulse*2)
@@ -188,9 +191,11 @@ class AMNtoLylipond(AMNFileParser):
                             else:
                                 bartext += ' ' + newNote + ' '
                             bartext+=alteration
+                        #Répétition de notes
                         if notes.noteRepetition:
                             for i in range(len(notes.noteRepetition)):
                                 bartext+=' '+ newNote + ' '
+                    #Répétitions de mesures
                     if bar.barRep:
                         if bar.repfactor:
                             nb_rep=int(bar.repfactor)
@@ -201,12 +206,14 @@ class AMNtoLylipond(AMNFileParser):
                         text += bartext
                     i += 1
                 text += '} \n'
+            #The END
             newStaff=merge1+ newStaff+'}\n' +merge2
             score+=newStaff
         score='<<'+score+'>>'
         text+=score
         header += '}\n'
         print(header + text)
+
     def convert_perfs(self,ssig):
         clef=''
         relative=''
