@@ -56,10 +56,10 @@ voices: *list*:
 									* .noteAlteration : *parseResult*
 										* .dynamic : *parseResult*
 											* .alt : "char"  
-											* .strenght : [] 
+											* .strength : [] 
 										* pitch : *parseResult*
 											* .alt : *"char"*  
-											* .strenght : *[]* or *["int"]* or *["int","%"]*
+											* .strength : *[]* or *["int"]* or *["int","%"]*
 									* .noteTimeAlteration : *parseResult*
 									* .noteOrnament : *parseResult*
 										* .leftshortsyncopa : *"<" or ""*
