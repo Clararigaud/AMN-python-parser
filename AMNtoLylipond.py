@@ -68,12 +68,12 @@ infosong = r"""
 O global \$C4:C\%72:4\?%\?%            #wahoo
 
 # there's still work to do
-O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
-| /!AAAA/***/_-17%BB~>G>!B/
-: /CG.EC/
-: /CG--------------------EC/
+O barbasednotation \$C4:C\?%\!!!!!!!!! #perfs without closing antislash rocks
+| /!AAAA/***/_-17%B>2B~>G>!B/
+: /C~~~~G.EC/
+: /<4%CG--------------------EC/
 
-O phrasebasednotation
+O phrasebasednotation\$C4:C\?3\
 | /ABC 
 : /ABC
 """
@@ -130,6 +130,45 @@ class AMNtoLylipond(AMNFileParser):
             #perfs
             if voice.perfs:
                 if voice.perfs.SSIG: clef, relative = self.convert_perfs(voice.perfs.SSIG)
+            valt=''
+            if voice.volumealteration:
+                for volumealteration in voice.volumealteration:
+                    #forte
+                    if volumealteration.factorforte :
+                        if int(volumealteration.factorforte)>=5 :
+                            valt+=r'\fffff'
+                        else:
+                            valt += '\\'
+                            n = int(volumealteration.factorforte)
+                            for i in range(n):
+                                valt+='f'
+                    elif volumealteration.suiteforte:
+                        if len(volumealteration.suiteforte)>=5:
+                            valt += r'\fffff'
+                        else:
+                            valt+='\\'
+                            n=len(volumealteration.suiteforte)
+                            for i in range(n):
+                                valt+='f'
+                    #piano
+                    if volumealteration.factorpiano:
+                        if int(volumealteration.factorpiano)>=5 :
+                            valt+=r'\ppppp'
+                        else:
+                            valt += '\\'
+                            n = int(volumealteration.factorpiano)
+                            for i in range(n):
+                                valt+='p'
+                    elif volumealteration.suitepiano:
+                        if len(volumealteration.suitepiano)>=5:
+                            valt += r'\ppppp'
+                        else:
+                            valt+='\\'
+                            n=len(volumealteration.suitepiano)
+                            for i in range(n):
+                                valt+='p'
+
+
             for lines in voice.lines:
                 supplement=''
                 for j in range(i):
@@ -141,6 +180,8 @@ class AMNtoLylipond(AMNFileParser):
                     newStaff+='}\n '+ '\\new Staff { \\'
                     merge1=r'\new GrandStaff<<\set GrandStaff.instrumentName = #"'+ voice.name+'" '
                     merge2='>>\n'
+                if lines.types=='data':
+                    clef, relative = self.convert_perfs(voice.perfs.SSIG)
                 #Ajout de la hauteur des perfs locales ou globales
                 text += voice.name + supplement+ '=' + relative + '{' + clef
                 newStaff+=voice.name + supplement
@@ -159,30 +200,49 @@ class AMNtoLylipond(AMNFileParser):
                             #Alterations
                             if notes.noteAlteration:
                                 if notes.noteAlteration.pitch:
+                                    if notes.pitch.strength:
+                                        if len(notes.pitch.strength) == 2:
+                                            if notes.pitch.strength[1] == "%":
+                                                quart += 0.5
+                                        if notes.noteAlteration.pitch.alt[0] in ('<','-'):
+                                            var -= int(notes.pitch.strength[0])-1
+                                        elif notes.noteAlteration.pitch.alt[0] in ('>','+'):
+                                            var += int(notes.pitch.strength[0])-1
+                                    #Pitch
                                     for alt in notes.noteAlteration.pitch.alt:
                                         if alt in ('+','-'):
                                             if alt=='+':var+=1
                                             if alt=='-': var-=1
+                                            newNote = self.varPitch(self.__dico_note[notes.note], var, quart)
+                                        elif alt in ('<','>'):
+                                            if alt=='>':
+                                                var+=1
+                                                alteration+= self.__dico_pitch_alt[alt]
+                                                if quart != 0:
+                                                    newNote = self.varPitch(self.__dico_note[notes.note], 12, 0)
+                                                for i in range(var-1):
+                                                    alteration += self.__dico_pitch_alt[alt]
+                                            elif alt=='<':
+                                                var -= 1
+                                                alteration +=  self.__dico_pitch_alt[alt]
+                                                if quart != 0:
+                                                    newNote = self.varPitch(self.__dico_note[notes.note], -12, 0)
+                                                for i in range(-var-1):
+                                                    alteration += self.__dico_pitch_alt[alt]
+
                                         else:
                                             alteration += self.__dico_pitch_alt[alt]
-                                    if len(notes.pitch.strength) > 0:
-                                        if var<0:
-                                            var -= int(notes.pitch.strength[0]) - 1
-                                        else:
-                                            var += int(notes.pitch.strength[0]) - 1
-                                        if len(notes.pitch.strength) == 2:
-                                            if notes.pitch.strength[1] == "%":
-                                                quart += 0.5
-                                    newNote=self.varPitch(self.__dico_note[notes.note],var,quart)
+                                # Dynamic #Tellement moins chiaaaaaant
                                 if notes.noteAlteration.dynamic:
                                     for alt in notes.noteAlteration.dynamic.alt:
                                         alteration+= '-'+self.__dico_dyn_alt[alt]
+
                             if newNote=='':newNote=self.__dico_note[notes.note]
-                            #Rythme
+                            #Rythme + notes
                             if len(notes)>=2:
                                 if notes[1] == "'":
                                     nb = str(pulse*2)
-                                    bartext += ' ' + newNote + nb + ' '
+                                    bartext += ' ' + newNote +  nb + ' '
                                 elif notes[1] == '"':
                                     nb= str(pulse*4)
                                     bartext += ' ' + newNote + nb + ' '
@@ -190,7 +250,8 @@ class AMNtoLylipond(AMNFileParser):
                                     bartext+=' '+ newNote + ' '
                             else:
                                 bartext += ' ' + newNote + ' '
-                            bartext+=alteration
+                            bartext+=alteration+valt
+                            valt=''
                         #Répétition de notes
                         if notes.noteRepetition:
                             for i in range(len(notes.noteRepetition)):
@@ -240,7 +301,6 @@ class AMNtoLylipond(AMNFileParser):
         relative = r'\relative '+ relative
         return clef, relative
     def varPitch(self,note,var,quart):
-        print(var)
         dicoplus={'a':'b','b':'c','c':'d','d':'e','e':'f','f':'g','g':'a'}
         dicomoins={'a':'g','g':'f','f':'e','e':'d','d':'c','c':'b','b':'a'}
         newNote=''
@@ -269,7 +329,6 @@ class AMNtoLylipond(AMNFileParser):
                     note=dicomoins[note]
             else:
                 for i in range(-var2):
-                    print(note)
                     note=dicomoins[note]
             newNote = note + newNote
             if reste != 0:
