@@ -30,16 +30,15 @@
 				<p>Le langage Lylipond est un langage permettant de créer des partitions. 
 				Il ressemble au langage html, car il utilise un système de balises. Les 
 				commandes s’écrivent sous la forme \nomcommande et est suivie de balises comme <<   >> ou {   }. <br/>
-				Par exemple :<br/><br/>
-				\score{c'}<br/><br/>
-				Donne le fragment de partition suivant :<br/>
+					Par exemple :<br/><br/></p>
+				<p class="code" >\score{c'}<br/><br/></p>
+				<p>Donne le fragment de partition suivant :<br/>
 				<img src='images/exemple1.PNG'><br/>
 				Ici, bien qu’on ait seulement indiqué qu’on voulait le cinquième do (ici écrit c’), 
 				la clé de sol et le C représentant la métrique 4/4 sont mis automatiquement. Lylipond
-				n’est donc pas un langage où l’on écrit tout manuellement, certaines choses se mettent à jour automatiquement. 
+				n’est donc pas un langage où l’on écrit tout manuellement, certaines choses se mettent à jour automatiquement. </p>
 			</article>
 			<article>
-					</p>
 				<h3>Entête</h3>
 				<p>Le format Lylipond permet d'écrire proprement le titre, le sous-titre, le nom du
 				compositeur et du parolier, si le fichier AMN contient un ou plusieurs de ces élements.
@@ -70,16 +69,16 @@
 			</article>
 			<article>
 				<h3>Clé et hauteur relative</h3>
-				<p>Pour chaque voix en AMN, il est possible de déterminer la tonalité des notes, en indiquant la note minimale. Le même principe existe en Lylipond grâce à la commande :<br/> <br/>
-\relative note { mélodie }<br/> <br/>
-La note indiqué donnera la note minimale, et toute note, sauf altération explicite, devra être plus aigüe qu’elle. 
+				<p>Pour chaque voix en AMN, il est possible de déterminer la tonalité des notes, en indiquant la note minimale. Le même principe existe en Lylipond grâce à la commande :<br/> <br/></p>
+				<p class = "code">\relative note { mélodie }</p><br/> <br/>
+<p>La note indiqué donnera la note minimale, et toute note, sauf altération explicite, devra être plus aigüe qu’elle. 
 En revanche, le langage AMN ne donne pas la clé avec laquelle sont écrites les notes des mesures, car l’écriture anglaise avec des lettres permet de s’en passer. En revanche, cette clé est nécessaire en Lylipond, car si l’on se situe en clé de sol alors que nous avons une note très basse, celle-ci se trouvera hors de la portée et sera donc difficile à lire comme il suit :<br /> <br/>
 <img src='images/exemple3.PNG'><br/>
 Alors qu’avec une clé de fa, cela est plus intuitif.<br/>
 <img src='images/exemple4.PNG'><br/>
 Nous avons donc mis en place un système détectant si la tonalité des notes d’une voix est plus lisible en clé de fa ou en clé de sol. La clé de sol est mise en place automatiquement si aucune clé est indiquée. En revanche, la clé de fa doit être écrite manuellement si l’on veut qu’elle apparaisse.<br/>
-La clé de fa s’écrit de la manière suivante : <br /> <br/>
-\clef bass
+	La clé de fa s’écrit de la manière suivante : <br /> <br/></p>
+<p class = "code">\clef bass
 </p>
 			</article>
 			<article>
@@ -104,13 +103,13 @@ La clé de fa s’écrit de la manière suivante : <br /> <br/>
 				<p>Pour un instrument à deux voix tel que le piano, AMN permet d’écrire une première
 				mélodie pour la main droite et une seconde pour la main gauche. En Lylipond, on peut
 				également assembler des portées à l’aide d’une accolade, dont la commande s’écrit :<br/><br/>\new GrandStaff<< \new Staff {voix une} \new Staff{voix deux}>> <br/><br/>
-				On peut également donner un nom à ce groupe de portées en ajoutant avant le premier \newStaff la commande:<br/><br/> 
-				\set GrandStaff.instrumentName =# "nom de l'instrument"<br/><br/>
+				On peut également donner un nom à ce groupe de portées en ajoutant avant le premier \newStaff la commande:<br/><br/> </p>
+				<p class = "code">\set GrandStaff.instrumentName =# "nom de l'instrument"</p><br/><br/>
 				
-				Le langage AMN nous donne la possibilité de répéter n fois une même mesure avec n 
+				<p>Le langage AMN nous donne la possibilité de répéter n fois une même mesure avec n 
 				choisie par celui qui écrit le fichier. Cela est compatible avec le langage Lylipond 
-				via la commande suivante :<br/><br/>
-				\repeat percent n { mesure à répeter}</p>
+				via la commande suivante :</p><br/><br/>
+				<p class = "code">\repeat percent n { mesure à répeter}</p>
 			</article>
 			
 		</div>
