@@ -116,15 +116,19 @@ class AMNtoLylipond(AMNFileParser):
             newStaff = ''
             merge1 = merge2 = ''
             i=0
+            pulse = 4
             time=4
             for lines in voice.lines:
                 BPB = 0
+                max_pulse = 0
                 for bar in lines.content:
+                    self.__nbelem = 0
                     BPB = max(BPB, len(bar[0][0]))
                     pulse = 0
                     for elems in bar[0][0]:
                         for elem in elems:
                             pulse += 2 if elem == '"' else 1
+                            max_pulse = max(pulse,max_pulse)
                     time = str(pulse) + "/" + str(BPB)
             newStaff += r'\new Staff { \time' + str(time)
             #perfs
@@ -190,6 +194,7 @@ class AMNtoLylipond(AMNFileParser):
                     bartext=''
                     #Parcours des élements dans les mesures
                     for barelem in bar.barcontent:
+                        rythme = ''
                         #Notes
                         for notes in barelem.Notes:
                             nb = ''
@@ -239,18 +244,20 @@ class AMNtoLylipond(AMNFileParser):
 
                             if newNote=='':newNote=self.__dico_note[notes.note]
                             #Rythme + notes
-                            if len(notes)>=2:
+                            if len(notes) > 1:
                                 if notes[1] == "'":
-                                    nb = str(pulse*2)
-                                    bartext += ' ' + newNote +  nb + ' '
+                                    nb = str(max_pulse*2)
+                                    bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
                                 elif notes[1] == '"':
-                                    nb= str(pulse*4)
-                                    bartext += ' ' + newNote + nb + ' '
+                                    nb= str(max_pulse*4)
+                                    bartext += ' ' + self.__dico_note[notes.note] + nb + ' ' + self.__dico_note[notes.note] + nb + ' '
                                 else:
-                                    bartext+=' '+ newNote + ' '
-                            else:
-                                bartext += ' ' + newNote + ' '
-                            bartext+=alteration+valt
+                                    bartext += ' ' + self.__dico_note[notes.note] + ' '
+
+                            #rythme = self.nbRythme(BPB,barelem,notes)
+
+                            bartext += ' ' + self.__dico_note[notes.note] + str(rythme) + ' '
+                            
                             valt=''
                         #Répétition de notes
                         if notes.noteRepetition:
@@ -339,7 +346,46 @@ class AMNtoLylipond(AMNFileParser):
             newNote = note + newNote
         newNote+=octave
         return newNote
+    
+    def nbRythme(self,BPB,bar,note):
+        #BPB/nb pulse*nbelem
 
+        if len(bar) == BPB:
+            print('1')
+            return int(BPB)
+        else:
+            print('2')
+            print('bar = ',bar)
+            print('Note = ', note)
+            print('nbelem : ', self.__nbelem)
+            if len(note) > 1 :
+                print('3')
+                for elem in note:
+                    if elem in ['A','B','C','D','E','F','G']:
+                        if elem in bar[self.__nbelem]:
+                            rythme = BPB / len(bar) * len(bar[self.__nbelem])
+                            if len(bar[self.__nbelem]) < self.__nbelem:
+                                self.__nbelem += 1
+                            #else:
+                             #   self.__nbelem = 0
+                            print('Rythme = ',rythme)
+                            return int(rythme)
+
+
+            elif note[0] in bar[self.__nbelem]:
+                print('4')
+                rythme = BPB/len(bar)*len(bar[self.__nbelem])
+                print(len(bar[self.__nbelem]), 'eeeeeeeeeee')
+                if len(bar[self.__nbelem]) < self.__nbelem:
+                    self.__nbelem = 0
+                else:
+                    if self.__nbelem+1 >= len(bar[self.__nbelem]):
+                        self.__nbelem = 0
+                    else:
+                        self.__nbelem += 1
+
+                print('Rythme = ', rythme)
+                return int(rythme)
 
 
 
