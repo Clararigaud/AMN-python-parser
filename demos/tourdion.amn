@@ -7,17 +7,17 @@
 O global \$ D : D \% 104 : 2\
 
 O voice1
-| [EFG AGF] [E" FGA] [BAG GAF] [G' FED] [EFG AGF] [E' G' F'] [E" 'D'] [E]
-< [B" ABC] [B"' B'] [>ECBAGF] [G" FE'] [B" ABC] [B'A BF'] [E" 'D'] [E] 
+| [EFG AGF] [E"FGA] [BAG GAF] [G' FED] [EFG AGF] [E' G' F'] [E"'D'] [E]
+| [B" ABC] [B"'B'] [>ECBAGF] [G" FE'] [B" ABC] [B'A BF'] [E"'D'] [E] 
 
 O voice2 \$A4\
-| [B" 'B'] [E" 'E'] [D" 'E'] [E'A] [G" 'E'] [BAB CD'] [B'B "'] [B]
-< [G" 'G'] [G" 'G'] [F" 'F'] [E" 'E'] [D" 'D'] [D" 'D'] [B'B "'] [B]
+| [B"'B'] [E"'E'] [D"'E'] [E'A] [G"'E'] [BAB CD'] [B'B"'] [B]
+| [G"'G'] [G"'G'] [F"'F'] [E"'E'] [D"'D'] [D"'D'] [B'B"'] [B]
 
 O voice3 \$E\
-| [G" 'E'] [B" 'B'] [B" '-C'] [B" 'A'] [B" 'B'] [G" 'A'] [B'F EF'] [E]
-< [>E" 'E] [D" 'D'] [E" 'E'] [B" 'B'] [B" 'B'] [B" 'A'] [B'F "'] [E]
+| [G"'E'] [B"'B'] [B"'-C'] [B"'A'] [B"'B'] [G"'A'] [B'F EF'] [E]
+| [>E"'E] [D"'D'] [E"'E'] [B"'B'] [B"'B'] [B"'A'] [B'F"'] [E]
 
 O voice4 \$B3\
-| [E" 'E] [E" 'E] [G'>B 'A'] [E'F "'] [E" 'E] [E" 'E] [E" 'D] [E] 
-< [E" 'E'] [G" 'G'] [B" 'B'] [E" 'E'] [G" 'G'] [G" 'D'] [E'B "'] [E]
+| [E"'E] [E"'E] [G'>B'A'] [E'F"'] [E"'E] [E"'E] [E"'D] [E] 
+| [E"'E'] [G"'G'] [B"'B'] [E"'E'] [G"'G'] [G"'D'] [E'B"'] [E]
