@@ -9,26 +9,24 @@ from AMN_Python_Parser import *
 FJ = r"""
 #title= Tourdion
 #subtitle= Quand je bois du vin clairet
-#music author = Anonymous
+#author = Anonymous
 #parole de chanson à ajouter. Question pour Monsieur Schlick, le langage pour les paroles est-il le même que pour les notes? Ou osef, c'est juste visuel?
 #Quand on dit IPN = A4, si on fait un si(B) , ça donne le B5 ou le B4???
 #Si on indique la gamme dans les perfs, est-ce que les bémol/ dièses sont mis automatiquement sur la note quand elle est indiquée ou faut quand même les mettre à la main???
 #Le ternaire c'est chiant
-O global \$ A6 : D \% 104 : 2\
+O global \$ D : D \% 104 : 2\
 
 O voixune
 |  / EFG AGF / E" FGA / BAG GAF / G' FED / EFG AGF / E' G' F' / E"' D' / E /
-:  / B" ABC / B"' B' / >ECBAGF / G" FE' / B" ABC / B'A BF' / E"' D' / E /
-:  / B" ABC /***/ B"' B' / >ECBAGF / G" FE' / B" ABC / B'A BF' / E"' D' / E /
+|  / B" ABC / B"' B' / >ECBAGF / G" FE' / B" ABC / B'A BF' / E"' D' / E /
 
 O voixdeux \$A4\
 |  / B"' B' / E"' E' / D"' E' / E'A / G"' E' / BAB CD' / B' B"' / B /
-:  / G"' G' / G"' G' / F"' F' / E"' E' / D"' D' / D"' D' / B' B"' / B /
-:  / G"' G' / G"' G' / F"' F' / E"' E' / D"' D' / D"' D' / B' B"' / B /
+|  / G"' G' / G"' G' / F"' F' / E"' E' / D"' D' / D"' D' / B' B"' / B /
 
 O voixtrois \$E\
 |  / G"' E' / B"' B' / B"' -C' / B"' A' / B"' B' / G"' A' / B'F EF' / E
-| >E"' E / D"' D' / E"' E' /***/ B"' B' / B"' B' / B"' A' / B' F"' / E
+| >E"' E / D"' D' / E"' E' / B"' B' / B"' B' / B"' A' / B' F"' / E
 
 O voixquatre \$B3\
 | E"' E / E"' E / G'>B' A' / E' F"' / E"' E / E"' E / E"' D / E /
@@ -41,8 +39,8 @@ Remplie=r"""#title=Remplis ton verre vide
 O global \$ F : D \% 208 : 8\
 
 O voice1
-| @"" A / D'D C'B / A" A'A*3 / G'F E'A / F"" F /*4
-|  / F'F** E'D / A'A A'A /***/ BCD DEC / D"""
+| @"" !A / D'D C'B / A" A'A*3 / !G'F E'A / F"" F /*4
+|  / <F'F** E'D / A'A >A'A /***/ BCD :DEC / D"""
 Imagine = r"""
 
 #title = Imagine
@@ -71,9 +69,9 @@ O global \$C4:C\%72:4\?%\?%            #wahoo
 
 # there's still work to do
 O barbasednotation \$C4:C\?% #perfs without closing antislash rocks
-| /AAAA/***/BBBB/
-: /CGEC/
-: /CGEC/
+| /!AAAA/***/_-17%BB~>G>!B/
+: /CG.EC/
+: /CG--------------------EC/
 
 O phrasebasednotation
 | /ABC 
@@ -91,7 +89,8 @@ class AMNtoLylipond(AMNFileParser):
         #fichier = open(str(self.title)+".ly", "w")
         header = '\header {\n'
         self.__dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g','@':'r'}
-        dico_dyn_alteration = {'!': '^', '?': '+', '.': '.', '_': '-'}
+        self.__dico_pitch_alt={'+':'es','-':'es','>':"'",'<':',','~':'\glissando '}
+        self.__dico_dyn_alt = {'!': '^', '?': '+', '.': '.', '_': '-'}
         i = 0
         dic = {self.title: "title", self.subtitle: "subtitle", self.musicauthor: "composer",
                self.fileauthor: "arranger", self.lyricsauthor: 'poet'}
@@ -117,6 +116,7 @@ class AMNtoLylipond(AMNFileParser):
             newStaff = ''
             merge1 = merge2 = ''
             i=0
+            time=4
             for lines in voice.lines:
                 BPB = 0
                 for bar in lines.content:
@@ -147,19 +147,50 @@ class AMNtoLylipond(AMNFileParser):
                     for barelem in bar.barcontent:
                         for notes in barelem.Notes:
                             nb = ''
-                            if notes[1] == "'":
-                                nb = str(pulse*2)
-                                bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
-                            elif notes[1] == '"':
-                                nb= str(pulse*4)
-                                bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
-                            else:
-                                bartext+=' '+ self.__dico_note[notes.note] + ' '
-                            if notes.noteRepetition:
-                                for i in range(len(notes.noteRepetition)):
-                                    bartext+=' '+ self.__dico_note[notes.note] + ' '
+                            var=0
+                            quart=0
+                            alteration=''
+                            newNote=''
                             if notes.noteAlteration:
-                                pass
+                                if notes.noteAlteration.pitch:
+
+                                    for alt in notes.noteAlteration.pitch.alt:
+                                        if alt in ('+','-'):
+                                            if alt=='+':var+=1
+                                            if alt=='-': var-=1
+                                        else:
+                                            alteration += self.__dico_pitch_alt[alt]
+                                    if len(notes.pitch.strength) > 0:
+                                        if var<0:
+                                            var -= int(notes.pitch.strength[0]) - 1
+                                        else:
+                                            var += int(notes.pitch.strength[0]) - 1
+                                        if len(notes.pitch.strength) == 2:
+                                            if notes.pitch.strength[1] == "%":
+                                                quart += 0.5
+                                    newNote=self.varPitch(self.__dico_note[notes.note],var,quart)
+                                if notes.noteAlteration.dynamic:
+                                    for alt in notes.noteAlteration.dynamic.alt:
+                                        alteration+= '-'+self.__dico_dyn_alt[alt]
+
+
+
+                            if newNote=='':newNote=self.__dico_note[notes.note]
+                            if len(notes)>=2:
+                                if notes[1] == "'":
+                                    nb = str(pulse*2)
+                                    bartext += ' ' + newNote + nb + ' '
+                                elif notes[1] == '"':
+                                    nb= str(pulse*4)
+                                    bartext += ' ' + newNote + nb + ' '
+                                else:
+                                    bartext+=' '+ newNote + ' '
+                            else:
+                                bartext += ' ' + newNote + ' '
+                            bartext+=alteration
+                        if notes.noteRepetition:
+                            for i in range(len(notes.noteRepetition)):
+                                bartext+=' '+ newNote + ' '
                     if bar.barRep:
                         if bar.repfactor:
                             nb_rep=int(bar.repfactor)
@@ -201,6 +232,47 @@ class AMNtoLylipond(AMNFileParser):
                 relative+="'"
         relative = r'\relative '+ relative
         return clef, relative
+    def varPitch(self,note,var,quart):
+        print(var)
+        dicoplus={'a':'b','b':'c','c':'d','d':'e','e':'f','f':'g','g':'a'}
+        dicomoins={'a':'g','g':'f','f':'e','e':'d','d':'c','c':'b','b':'a'}
+        newNote=''
+        var2=var//2
+        reste=var%2
+        octave=''
+        if var2>0:
+            if var2 > 7:
+                for i in range(var2//7):
+                    octave+="'"
+                for j in range(var2%7):
+                    note=dicoplus[note]
+            else:
+                for i in range(var2):
+                    note = dicoplus[note]
+            newNote = note + newNote
+            if reste !=0:
+                newNote += 'is'
+            if quart == 0.5:
+                newNote+='ih'
+        elif var2<0:
+            if var2 <-7:
+                for i in range(-var2//7):
+                    octave+=','
+                for j in range(-var2%7):
+                    note=dicomoins[note]
+            else:
+                for i in range(-var2):
+                    print(note)
+                    note=dicomoins[note]
+            newNote = note + newNote
+            if reste != 0:
+                newNote += 'es'
+            if quart == 0.5:
+                newNote+='eh'
+        else:
+            newNote = note + newNote
+        newNote+=octave
+        return newNote
 
 
 
@@ -210,4 +282,9 @@ class AMNtoLylipond(AMNFileParser):
 
 
 
-AMNtoLylipond(Remplie)
+
+
+
+
+
+AMNtoLylipond(infosong)
