@@ -119,12 +119,12 @@ class AMNtoLylipond(AMNFileParser):
             pulse = 4
             time=4
             for lines in voice.lines:
-                BPB = 0
+                BPB = 4
                 max_pulse = 0
                 for bar in lines.content:
                     self.__nbelem = 0
                     BPB = max(BPB, len(bar[0][0]))
-                    pulse = 0
+                    pulse = 3
                     for elems in bar[0][0]:
                         for elem in elems:
                             pulse += 2 if elem == '"' else 1
@@ -246,10 +246,12 @@ class AMNtoLylipond(AMNFileParser):
                             #Rythme + notes
                             if len(notes) > 1:
                                 if notes[1] == "'":
-                                    nb = str(max_pulse*2)
+                                    #nb = str(max_pulse*2)
+                                    nb=''
                                     bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
                                 elif notes[1] == '"':
-                                    nb= str(max_pulse*4)
+                                    #nb= str(max_pulse*4)
+                                    nb=''
                                     bartext += ' ' + self.__dico_note[notes.note] + nb + ' ' + self.__dico_note[notes.note] + nb + ' '
                                 else:
                                     bartext += ' ' + self.__dico_note[notes.note] + ' '
