@@ -10,6 +10,10 @@ header{
 	max-width: 960px;
     margin: 0 auto;
 }
+p{
+	line-height: 1.5;
+	font-size: 14px;
+}
 
 #header-title{
 	text-align: center;
@@ -29,12 +33,14 @@ li.menuli{
 }
 a{
 	text-decoration: none;
-	color: #5d5d5d;
+    color: #0645ad;
 }
 a:hover{
-	color: black;
+	color: #0645ad;
 	text-decoration: underline;
-
+}
+a:visited{
+	color: #0b0080;
 }
 a.menulink {
     display: block;
@@ -43,8 +49,15 @@ a.menulink {
     padding: 18px;
     margin: 0px;
     border: 15px #000;
+    color:#5d5d5d;
 }
-
+a.menulink:hover{
+	color: #5d5d5d;
+	text-decoration: underline;
+}
+a.menulink:visited{
+	color: #5d5d5d;
+}
 ul#main-menu{
 	margin: 0;
     padding: 0;
