@@ -15,6 +15,9 @@ voices: *list*:
 				* .sign : "+" or "-" or ""
 				* .pitch : *str [A-G]*
 				* .octave: *str "<<" "<" ">" ">>" or [0-9]*
+			* .scalekey : *parseResult*: 				#simplescale by key
+				* .note : *char*
+				* .sign : *"-" or "+" or ""*
 		* .BSIG :  *parseResult*:
 			* .BPM : *str(int) or ""*
 			* .dynamic : *str(int) or ""*

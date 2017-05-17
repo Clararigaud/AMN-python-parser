@@ -55,11 +55,10 @@ Nb Voices:{0.nbVoices}""".format(self)
         #SCALE SIGNATURE====================================================================
         Sign = oneOf('+ -')
         
-        Key = Optional(Sign) + (Word(srange("[A-G]"),exact=1)("MAJOR")
-                                | Word(srange("[a-g]"),exact=1)("MINOR"))
+        Key = Optional(Sign)("sign") + Word(srange("[A-G]")+srange("[a-g]"),exact=1)("note")
         Fifth = '0' | Sign + Word(srange("[1-7]"),exact=1)
         Degree = Word(alphas)
-        SSCALE = Key | Fifth
+        SSCALE = Key("scalekey") | Fifth("fifth")
         Lower = OneOrMore("-") + Optional(Optional(Word(nums) | "%"))
         Raise = OneOrMore("+") + Optional(Optional(Word(nums) | "%"))
         Freq = "="+ Word(nums) + Optional(oneOf("' Hz"))
@@ -78,11 +77,11 @@ Nb Voices:{0.nbVoices}""".format(self)
         SSIG = Group(Suppress(Literal('$'))
                 + EOS
                 + Optional(Suppress(Literal(':'))
-                           + (SSCALE("SSCALE") | CSCALE("CSCALE")))("SCALE")
+                           + (SSCALE("SSCALE") | CSCALE("CSCALE")))
                 )
+        
         #GLOBALVOICEPERFS===================================================================        
         GlobalVoicePerf = (
-            
                 (
                     Group(Literal("!")+OneOrMore(Literal("!")))("suiteforte")
                     |(Suppress(Literal("!"))+Word(nums)("factorforte"))
@@ -521,16 +520,16 @@ O piano \$C5\%120:4\
 #est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
 """
 
-
 propre = r"""
-O voice \andante\mezzo forte\!!!\=~@
+O voice \$C3:-c\andante\mezzo forte\!!!\=~@
 | /!4/ !78>6C5 B'G9** /*145
 """
 if __name__ == "__main__":
     parsed = AMNFileParser(propre)
     print(parsed)
     for voice in parsed.Voices:
-        print("Voice volumealteration",voice.perfs.volumealteration)
+        print("Voice perfs",voice.perfs.SSIG.scalekey.sign)
+        print(voice.perfs.SSIG.scalekey.note)
         for bar in voice.lines[0].content:
             print("\n",bar)
             print("Bar repetition :",bar.barRep)
@@ -550,5 +549,4 @@ if __name__ == "__main__":
                         print("note alt",note.noteAlteration.asDict())
                         print("  pitch alt ", note.pitch.alt, note.pitch.strength)
                         print("  dynamic alt", note.dynamic.alt ,note.dynamic.strength)
-                    
-              
+                        
