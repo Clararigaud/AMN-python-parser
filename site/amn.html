@@ -33,7 +33,7 @@
 					Pour plus de détails sur la structure AMN, voir la <a href="" target="_blank">référence</a>.
 					Les informations liées à la partition sont exprimés sous la forme :
 				</p>
-				<p class="amn">
+				<p class="code">
 					# music author : John Lemon
 				</p>
 				<h4>Blocs</h4>
@@ -57,7 +57,7 @@
 				<p>Les Splitlines sont les lignes contenant les mesures. Elles commencent par le caractère "|". Deux lignes à la suite étant toutes deux des split lines seront
 				lues à la suite.</p>
 				<h4>Mergelines</h4>
-				<p>Les Mergelines sont des lignes s'écrivant éxactement comme des Splitlines, à la différence qu'elles commencent par ":" et qu'elles doivent être lues en même
+				<p>Les Mergelines sont des lignes s'écrivant exactement comme des Splitlines, à la différence qu'elles commencent par ":" et qu'elles doivent être lues en même
 				temps que les Splitlines. Par exemple pour un bloc voice représentant une musique jouée par un Piano, on aura une Splitline décrivant la main droite, et une Mergeline
 				contenant la main gauche. Celles-ci seront ainsi jouées en même temps.</p>
 				<h4>Chordslines</h4>
@@ -65,7 +65,7 @@
 				<h4>Lyricslines</h4>
 				<p>Les Lyricslines sont des lignes contenant des paroles. Celles-ci commencent par le caractère ">".</p>
 				<h4>Mesures</h4>
-				<p>Les mesures peuvent être délimitées soit par des barres \ \ soit par des crochets []. Elles contiennent des notes dans la notation anglaise. A ces notes sont attribués
+				<p>Les mesures peuvent être délimitées soit par des barres \ \ soit par des crochets []. Elles contiennent des notes dans la notation anglaise. A ces notes sont attribuées
 				des altérations, comme les dièses ou les bémoles, ainsi que des ornements, qui sont tous représentés par des caractères bien précis. Les dièse, par exemple, s'écrivent "+"
 				et se situent devant la note. La rytmique est établie par le nombre d'unités de temps, séparées par des espaces, et par le nombre de notes dans ces unités de temps.
 				Certains symboles permettent d'appliquer des répétitions ou des ornements aux mesures elles-mêmes. Les répétitions par exemple, sont représentées par le symbole "*"
@@ -77,7 +77,7 @@
 				plus facile. <br/><br/>
 				En revanche, de part son aspect "double lisibilité", le langage AMN est un langage peu visuel. Il faut donc une certaine période d'adaptation et d'apprentissage si l'on
 				veut pouvoir en saisir tous les aspects. Le système de rythmique est également assez compliqué à comprendre, car il est très peu visuel et il est nécessaire d'être familier 
-				avec lui pour pouvoir lire aisément. 
+				avec lui pour pouvoir le lire aisément. 
 				</p>
 				<h4>Exemple:</h4>
 				<p class="code">O  flute \$C6 # bar-based notation<br/>
