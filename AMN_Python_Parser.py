@@ -523,17 +523,19 @@ O piano \$C5\%120:4\
 
 
 propre = r"""
-O voice
+O voice \andante\mezzo forte\!!!\=~@
 | /!4/ !78>6C5 B'G9** /*145
 """
 if __name__ == "__main__":
     parsed = AMNFileParser(propre)
     print(parsed)
     for voice in parsed.Voices:
+        print("Voice volumealteration",voice.perfs.volumealteration)
         for bar in voice.lines[0].content:
             print("\n",bar)
             print("Bar repetition :",bar.barRep)
             print("Bar alteration :",bar.barAlt)
+            
             for timel in bar.barcontent:
                 for note in timel.Notes:
                     print("->pitch",note.note)

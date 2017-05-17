@@ -18,22 +18,23 @@ voices: *list*:
 		* .BSIG :  *parseResult*:
 			* .BPM : *str(int) or ""*
 			* .dynamic : *str(int) or ""*
-		* .suiteforte : *["!","!",...] or ""*
-		* .factorforte : *"N" or ""*
-		* .mezzoforte : *"%" or ""*
-		* .suitepiano : *["?","?",...] or ""*
-		* .factorpiano : *"N" or ""*
-		* .mezzopiano : *"%" or ""*
-		* .shortcrescendo :  *"?~!" or ""*
-		* .longcrescendo :  *"?~~!" or ""*
-		* .shortdecrescendo :  *"!~?" or ""*
-		* .longdecrescendo :  *"!~~?" or ""*
-		* .shortfadin :  *"@~=" or ""*
-		* .longfadein :  *"@~~=" or ""*
-		* .shortfadout :  *"=~@" or ""*
-		* .longfadeout :  *"=~~@" or ""*
-		* .tradexp: *str or ""*
-		* .cancel: *"=" or ""* 
+		* .volumealteration :*parseResult*:
+			* .suiteforte : *["!","!",...] or ""*
+			* .factorforte : *"N" or ""*
+			* .mezzoforte : *"%" or ""*
+			* .suitepiano : *["?","?",...] or ""*
+			* .factorpiano : *"N" or ""*
+			* .mezzopiano : *"%" or ""*
+			* .shortcrescendo :  *"?~!" or ""*
+			* .longcrescendo :  *"?~~!" or ""*
+			* .shortdecrescendo :  *"!~?" or ""*
+			* .longdecrescendo :  *"!~~?" or ""*
+			* .shortfadin :  *"@~=" or ""*
+			* .longfadein :  *"@~~=" or ""*
+			* .shortfadout :  *"=~@" or ""*
+			* .longfadeout :  *"=~~@" or ""*
+			* .tradexp: *str or ""*
+			* .cancel: *"=" or ""* 
 
 	* .lines : *list*
 		* [*parseResult*:
@@ -53,12 +54,12 @@ voices: *list*:
 										* .repsuite : *["\*,\*,.."]*
 										* .repfactor : *str(int) or ""*
 									* .noteAlteration : *parseResult*
-										* .dynamic : * parseResult *
+										* .dynamic : *parseResult*
 											* .alt : "char"  
 											* .strenght : [] 
-										* pitch : * parseResult *
-											* .alt : "char"  
-											* .strenght : [] 
+										* pitch : *parseResult*
+											* .alt : *"char"*  
+											* .strenght : *[]* or *["int"]* or *["int","%"]*
 									* .noteTimeAlteration : *parseResult*
 									* .noteOrnament : *parseResult*
 										* .leftshortsyncopa : *"<" or ""*
