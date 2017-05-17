@@ -26,26 +26,58 @@
 		<div id="content">
 		<h2 id ="pagetitle">Parser</h2>
 			<article>
-				<h3>Titre 1</h3>
+				<h3>Obtenir la structure du fichier</h3>
 				<p>
-					blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
+					Le principe du parseur est une traduction d'un langage définit par des règles de syntaxes en un autre langage. L'objectif ici a été de comprendre la syntaxe de AMN et d'en créer la grammaire avec python.
+					Dans un second temps, nous avons structuré l'objet résultant de ce parsing afin qu'il soit utilisable pour une traduction en un autre langage ultérieurement.
+				</p>
+				<h3>Définir une grammaire</h3>
+				<p>
+					La grammaire formelle de type <a href="https://fr.wikipedia.org/wiki/Forme_de_Backus-Naur" target="_blank" >Backus Naur Form</a> est de la forme :
+				</p>
+				<p class="code">
+					Nom = Mot</br>
+					Prenom = Mot</br>
+					P = Nom + Prenom
+				</p>
+				<p>
+					Nous avons utilisé le module <a href="https://pythonhosted.org/pyparsing/" target="_blank">PyParsing</a> qui fournit un moteur d'interpretation de ce type de grammaire.</br>
+				La classe <em>AMNFileParser</em> que nous avons créé prend donc en entrée un fichier AMN et procède à l'interprétation de ce dernier ligne par ligne de manière à éliminer les commentaires.<br/><br/>
+				Usage :
+			</p>
+				<p class="code">
+					>>> parsed = AMNFileParser("VitaminC.amn")</br>
+					>>> print(parsed)</br>
+					--------FILE INFOS------------</br>
+					AMN version: 1</br>
+					Title: Vitamin C</br>
+					subtitle: None</br>
+					Music Author: CAN</br>
+					Lyrics Author:CAN</br>
+					File Author:None</br>
+					File to merge: None</br>
+					Nb Voices:2</br>
+				</p>
 
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
+				<h3>Structure de sortie</h3>
+				<p>La strucure de sortie est pensée de manière à faciliter au maximum l'exploitation de toutes les informations : </br>
+					<a href="https://github.com/Clararigaud/AMN-python-parser/blob/master/README.md" target="_blank" >Voir le détail de la structure de sortie</a>
 				</p>
-			</article>
-			<article>
-				<h3>Titre 2</h3>
+
+				<h3>Limites</h3>
 				<p>
-					blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
- blabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalbblabla blablabl blablabl blblblblblbl blab lb ba blblblba blblbaaab l blabalb bblblbalaalb
-				</p>
-			</article>
+					Bien que grand nombre des informations soient récupérées, ils reste à implémenter quelques élements :
+					<ul>
+						<li>Complexes Beats - CBEATS</li>
+						<li>Gammes définie par une quinte et gammes complexes - CSCALES</li>
+						<li>Accords - ECN & CCN</li>
+						<li>Note ornaments ne sont pas fonctionnels</li>
+						<li>drum kit et alterations</li>
+
+					</ul>
+
+				</p>							
+</article>
 		</div>
 	</div>
 </body>

@@ -75,3 +75,15 @@ ul#main-menu{
 #content article{
 	padding: 0 10px;
 }
+
+.code{
+	font-family: 'courier';
+    color: blue;
+    border: solid 1px black;
+    padding-left: 20px;
+    background: #efefef;
+}
+
+#structure li{
+	list-style: none;
+}
