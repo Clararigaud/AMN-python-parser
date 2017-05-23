@@ -45,6 +45,10 @@ class AMNtoLylipond(AMNFileParser):
             i=0
             pulse = 4
             time=4
+            merge = False
+            for lines in voice.lines:
+                if lines.type=='merge':
+                    merge=True
             for lines in voice.lines:
                 BPB = 4
                 max_pulse = 0
@@ -58,8 +62,10 @@ class AMNtoLylipond(AMNFileParser):
                             max_pulse = max(pulse,max_pulse)
                     pulse = 4
                     time = str(pulse) + "/" + str(BPB)
-                            
-            newStaff += r'\new Staff { \time' + str(time)
+            newStaff += r'\new Staff {'
+            if not merge and lines.type=='split':
+                newStaff+='\set Staff.instrumentName=#"'+voice.name+'" '
+            newStaff+=r'\time' + str(time)
             #perfs
             if voice.perfs:
                 if voice.perfs.SSIG: clef, relative = self.convert_perfs(voice.perfs.SSIG)
@@ -109,6 +115,7 @@ class AMNtoLylipond(AMNFileParser):
                 #Merge ou split
                 if lines.type == 'split':
                     newStaff += '\\'
+
                 if lines.type == 'merge':
                     newStaff+='}\n '+ '\\new Staff { \\'
                     merge1=r'\new GrandStaff<<\set GrandStaff.instrumentName = #"'+ voice.name+'" '
@@ -238,6 +245,7 @@ class AMNtoLylipond(AMNFileParser):
                 relative+="'"
         relative = r'\relative '+ relative
         return clef, relative
+
     def varPitch(self,note,var,quart):
         dicoplus={'a':'b','b':'c','c':'d','d':'e','e':'f','f':'g','g':'a'}
         dicomoins={'a':'g','g':'f','f':'e','e':'d','d':'c','c':'b','b':'a'}
@@ -328,16 +336,3 @@ class AMNtoLylipond(AMNFileParser):
                 rythme = len(mesure[0][0])*nbbar
                 return int(rythme)
 
-
-
-
-
-AMNtoLylipond("demos/frerejacques.amn")
-
-
-
-
-
-
-
-AMNtoLylipond("demos/frerejacques.amn")
