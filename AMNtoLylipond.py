@@ -200,6 +200,7 @@ class AMNtoLylipond(AMNFileParser):
                             nb = ''
                             var=0
                             quart=0
+                            self.__long = False
                             alteration=''
                             newNote=''
                             #Alterations
@@ -244,18 +245,6 @@ class AMNtoLylipond(AMNFileParser):
 
                             if newNote=='':newNote=self.__dico_note[notes.note]
                             #Rythme + notes
-                            if len(notes) > 1:
-                                if notes[1] == "'":
-                                    #nb = str(max_pulse*2)
-                                    nb=''
-                                    bartext += ' ' + self.__dico_note[notes.note] + nb + ' '
-                                elif notes[1] == '"':
-                                    #nb= str(max_pulse*4)
-                                    nb=''
-                                    bartext += ' ' + self.__dico_note[notes.note] + nb + ' ' + self.__dico_note[notes.note] + nb + ' '
-                                else:
-                                    bartext += ' ' + self.__dico_note[notes.note] + ' '
-
                             rythme = self.nbRythme(BPB,barelem,notes)
                             if rythme == None:
                                 rythme = ''
@@ -353,26 +342,38 @@ class AMNtoLylipond(AMNFileParser):
         newNote+=octave
         return newNote
     
-    def nbRythme(self,BPB,bar,note):
-        #BPB/nb pulse*nbelem
-
+    def nbRythme(self,BPB,bar,note,mesure):
+        
         if len(bar) == BPB:
             return int(BPB)
         else:
             if len(note) > 1 :
                 for elem in note:
-                    if elem in ['A','B','C','D','E','F','G']:
+                    if note[1] =='"':
+                        self.__long = True
+                        return str(BPB*2) +'.'
+                    elif elem in ['A','B','C','D','E','F','G']:
                         if elem in bar[self.__nbelem]:
-                            rythme = BPB / len(bar) * len(bar[self.__nbelem])
+                            rythme = len(mesure[0][0])*(len(bar)-1)
                             if len(bar[self.__nbelem]) < self.__nbelem:
                                 self.__nbelem += 1
-                            #else:
-                             #   self.__nbelem = 0
+                            else:
+                                self.__nbelem = 0
                             return int(rythme)
 
 
             elif note[0] in bar[self.__nbelem]:
-                rythme = BPB/len(bar)*len(bar[self.__nbelem])
+                nbbar = len(bar)
+                if '"' in bar:
+                    if self.__long == True:
+                        self.__long = False
+                        return BPB * 2
+                    else:
+                        return BPB * 4
+                for a in bar:
+                    if a not in ['A','B','C','D','E','F','G']:
+                        nbbar -=1
+                rythme = len(mesure[0][0])*nbbar
                 if len(bar[self.__nbelem]) < self.__nbelem:
                     self.__nbelem = 0
                 else:
@@ -380,7 +381,15 @@ class AMNtoLylipond(AMNFileParser):
                         self.__nbelem = 0
                     else:
                         self.__nbelem += 1
-
+                return int(rythme)
+            else:
+                nbbar = len(bar)
+                for a in bar:
+                    if a not in ['A','B','C','D','E','F','G']:
+                        nbbar -=1
+                if bar[1] == '"':
+                    nbbar *= 2
+                rythme = len(mesure[0][0])*nbbar
                 return int(rythme)
 
 
