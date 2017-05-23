@@ -86,7 +86,7 @@ class AMNtoLylipond(AMNFileParser):
         self.translate()
     def translate(self):
         
-        #fichier = open(str(self.title)+".ly", "w")
+        fichier = open(str(self.title)+".ly", "w")
         header = '\header {\n'
         self.__dico_note = {'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g','@':'r'}
         self.__dico_pitch_alt={'+':'es','-':'es','>':"'",'<':',','~':'\glissando '}
@@ -99,8 +99,6 @@ class AMNtoLylipond(AMNFileParser):
                 header += dic[param] + '="' + param + '" \n'
             i += 1
         
-        #fichier.write(text)
-        #fichier.close()
         score=''
         text = ''
         clef=''
@@ -129,7 +127,9 @@ class AMNtoLylipond(AMNFileParser):
                         for elem in elems:
                             pulse += 2 if elem == '"' else 1
                             max_pulse = max(pulse,max_pulse)
+                    pulse = 4
                     time = str(pulse) + "/" + str(BPB)
+                            
             newStaff += r'\new Staff { \time' + str(time)
             #perfs
             if voice.perfs:
@@ -256,7 +256,9 @@ class AMNtoLylipond(AMNFileParser):
                                 else:
                                     bartext += ' ' + self.__dico_note[notes.note] + ' '
 
-                            #rythme = self.nbRythme(BPB,barelem,notes)
+                            rythme = self.nbRythme(BPB,barelem,notes)
+                            if rythme == None:
+                                rythme = ''
 
                             bartext += ' ' + self.__dico_note[notes.note] + str(rythme) + ' '
                             
@@ -282,7 +284,9 @@ class AMNtoLylipond(AMNFileParser):
         score='<<'+score+'>>'
         text+=score
         header += '}\n'
-        print(header + text)
+        fichier.write(header)
+        fichier.write(text)
+        fichier.close()
 
     def convert_perfs(self,ssig):
         clef=''
@@ -353,15 +357,9 @@ class AMNtoLylipond(AMNFileParser):
         #BPB/nb pulse*nbelem
 
         if len(bar) == BPB:
-            print('1')
             return int(BPB)
         else:
-            print('2')
-            print('bar = ',bar)
-            print('Note = ', note)
-            print('nbelem : ', self.__nbelem)
             if len(note) > 1 :
-                print('3')
                 for elem in note:
                     if elem in ['A','B','C','D','E','F','G']:
                         if elem in bar[self.__nbelem]:
@@ -370,14 +368,11 @@ class AMNtoLylipond(AMNFileParser):
                                 self.__nbelem += 1
                             #else:
                              #   self.__nbelem = 0
-                            print('Rythme = ',rythme)
                             return int(rythme)
 
 
             elif note[0] in bar[self.__nbelem]:
-                print('4')
                 rythme = BPB/len(bar)*len(bar[self.__nbelem])
-                print(len(bar[self.__nbelem]), 'eeeeeeeeeee')
                 if len(bar[self.__nbelem]) < self.__nbelem:
                     self.__nbelem = 0
                 else:
@@ -386,7 +381,6 @@ class AMNtoLylipond(AMNFileParser):
                     else:
                         self.__nbelem += 1
 
-                print('Rythme = ', rythme)
                 return int(rythme)
 
 
@@ -401,4 +395,4 @@ class AMNtoLylipond(AMNFileParser):
 
 
 
-AMNtoLylipond(infosong)
+AMNtoLylipond("demos/frerejacques.amn")

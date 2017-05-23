@@ -3,8 +3,9 @@ import sys
 
 class AMNFileParser(object):
     def __init__(self,AMNFile):
-
-        self.__file = AMNFile #make checkups
+        with open(AMNFile, 'r') as enter:
+            self.__file = enter.read()
+        #self.__file = AMNFile #make checkups
         self.__AMN = None
         self.__title = None
         self.__subtitle = None
@@ -472,81 +473,8 @@ Nb Voices:{0.nbVoices}""".format(self)
         pass
     def play(self):
         pass
-                     
-infosong = r"""
-# this is a comment
-#title = Supersong # this is a comment
-#this is a comment between two infos and it works !
-# music author = Clara #this is a comment
-#this is a comment
-#AMN = 1.0
 
-O global \$-C5:C\%72:4\?%\!!!!\mezzo forte\=       #wahoo
-
-# there's still work to do
-O barbasednotation \$-C4:C\%72~120\?%\!!!\=~~@\mezzo forte\=\?9 #perfs without closing antislash rocks
-| /!3/!9C8*9\>\D*E\>>\C /*******/EF\>\ G /*59
-: /C GEC/
-
-O phrasebasednotation \$C4:C\%72:4\?%\?%   
-| [CGEC] [C** GEC]
-
-O barbasednotation
-| /CGEC/
-"""
-verre = r"""
-#title=Remplis ton verre vide
-#music author=Etienne Daniel
-#Chanson à deux voix d'après une chanson à boire de XVIIe s
-
-O global \$ F : D \% 208 : 4\
-
-O chant  \$ F : D
-| [@""A A]** [D""DC'B][A""A'A][G'FE'A][AA B][F""F]
-
-O flute
-| /!/C>D*EC /*******/EF\>\ G /*59
-: /CGEC/CG EC/CGE C/
-"""
-
-boogie = r"""
-#------------------------------------------------------------------------------------------------------------------------------------
-#title= Boogie
-#Et est-ce que c'est comme en musique quand il y a des dièses et des bémol? Cad que le dièses s'applique sur toute la mesure? 
-O piano \$C5\%120:4\
-| [+DE GG +DE GG] [+DE CC @'] [+GA >C>C +GA >C>C] [GF EC @'] [B+D BG A>C AF] [+DE CC @']
-= \$C4\
-: [CG CG CG CG] [CG CG -BG >C] [>%FC >%FC >%FC >%FC] [CG CG -BG >C] [>%GD >%GD >%FD >%FD] [CG CG -BG >C] #chord notation
-#est-ce qu'on peut mettre le égal comme ça, suivit d'un merge?
-"""
-
-propre = r"""
-O voice \$C3:-c\andante\mezzo forte\!!!\=~@
-| /!4/ !78>6C5 B'G9** /*145
-"""
 if __name__ == "__main__":
-    parsed = AMNFileParser(propre)
+    parsed = AMNFileParser("demos/frerejacques.amn")
     print(parsed)
-    for voice in parsed.Voices:
-        print("Voice perfs",voice.perfs.SSIG.scalekey.sign)
-        print(voice.perfs.SSIG.scalekey.note)
-        for bar in voice.lines[0].content:
-            print("\n",bar)
-            print("Bar repetition :",bar.barRep)
-            print("Bar alteration :",bar.barAlt)
-            
-            for timel in bar.barcontent:
-                for note in timel.Notes:
-                    print("->pitch",note.note)
-                    print(note.asDict())
-                    if note.noteOrnament :
-                        print("note ornament: ",note.noteOrnament)
-                    if note.noteRepetition:
-                        print("note rep",note.noteRepetition)
-                        print("repsuite",note.repsuite)
-                        print("repfactor",note.repfactor)
-                    if note.noteAlteration:
-                        print("note alt",note.noteAlteration.asDict())
-                        print("  pitch alt ", note.pitch.alt, note.pitch.strength)
-                        print("  dynamic alt", note.dynamic.alt ,note.dynamic.strength)
                         

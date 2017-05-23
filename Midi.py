@@ -13,22 +13,6 @@ except ImportError:
 from AMN_Python_Parser import *
 import os
 
-test = r"""
-O global \$C5:c\%90
-
-O piano
-| [CDEC][CDEC] [EF G][EF G] [G"A GF E C][G"A GF E C] [C<G C][C<G C]
-#frere jacques bitches
-#: [EFGE][EFGE] [GA B][GA B] [B"C BH G E][B"C BH G E] [E<B E][E<B E]
-#merge line synchro avec split line
-
-O ocarina
-#| /++65%!!!5C*/C>>C
-
-#O piano 
-#| [C D][ E F ][G A ][B >C]
-"""
-
 class Midi_Parser(AMNFileParser):
     def __init__(self,file):
         AMNFileParser.__init__(self,file)
@@ -53,91 +37,36 @@ class Midi_Parser(AMNFileParser):
         voices = {}
         
         # GLOBAL PARAMETERS
-        self.globalpitch = "C" #default C5->72
-        self.globaloctave = 5
-        self.globalsign = 0
-        self.globalBPM = 120
-        self.globaldynamicBPM = None     
-        self.globalscale = {'C': 12, 'F': 17, 'A': 21, 'G': 19, 'E': 16, 'D': 14, 'B': 23}
-        
+        self.globalPerfs = {
+            "pitch" : "C",
+            "octave":5,
+            "sign":0,
+            "BPM" : 120,
+            "dynamicBPM":None,
+            "scale" : {'C': 12, 'F': 17, 'A': 21, 'G': 19, 'E': 16, 'D': 14, 'B': 23}
+            }
         if self.Global != None:
             if self.Global.perfs:
-                if self.Global.perfs.SSIG:
-                    if self.Global.perfs.MPN:
-                        self.globalMidiPitch = int(self.Global.MPN)
-                    elif self.Global.perfs.SSIG.IPN:
-                        s = {"-" : -1,"+":1}
-                        self.globalsign = 0
-                        if self.Global.perfs.SSIG.IPN.sign in s.keys():
-                            self.globalsign = s[self.Global.perfs.SSIG.IPN.sign]
-                        self.globalpitch = self.Global.perfs.SSIG.IPN.pitch
-                        if self.Global.perfs.SSIG.IPN.octave:
-                            mod = {"<":-1,"<<":-2,">":1,">>":2}
-                            if self.Global.perfs.SSIG.IPN.octave in mod.keys():
-                                self.globaloctave += mod[self.Global.perfs.SSIG.IPN.octave]
-                            elif self.Global.perfs.SSIG.IPN.octave in ["0","1","2","3","4","5","6","7","8","9"]:
-                                self.globaloctave = int(self.Global.perfs.SSIG.IPN.octave)
+                self.globalPerfs = self.assignPerfs(self.Global, self.globalPerfs)
 
-                        scalenote = "C"
-                        scalesign = 0
-                        if self.Global.perfs.SSIG.scalekey:
-                            scalenote = self.Global.perfs.SSIG.scalekey.note
-                            if self.Global.perfs.SSIG.scalekey.sign:
-                                scalesign = s[self.Global.perfs.SSIG.scalekey.sign]  
-                        self.globalscale = self.getGamme(scaleNote = scalenote, scaleSign = scalesign)
-                        
-                if self.Global.perfs.BSIG:
-                    self.globalBPM = int(self.Global.perfs.BSIG.BPM)
-                    if self.Global.perfs.BSIG.dynamic:
-                        self.globaldynamicBPM = int(self.Global.perfs.BSIG.dynamic)
-                    
         for i in range(self.nbVoices):
-            self.localBPM = self.globalBPM
-            self.localdynamicBPM = self.globaldynamicBPM
-            self.localpitch = self.globalpitch
-            self.localscale =  self.globalscale
-            self.localsign = self.globalsign
-            self.localoctave = self.globaloctave
+            self.localPerfs = self.globalPerfs
             
-            #LOCAL PARAMS (voir si on peut pas faire mieux (pas dupliquer)
-            if self.Voices[i].perfs:
-                if self.Voices[i].perfs.SSIG:
-                    if self.Voices[i].perfs.MPN:
-                        self.localMidiPitch = int(self.Voices[i].MPN)
-                    elif self.Voices[i].perfs.SSIG.IPN:
-                        s = {"-" : -1,"+":1}
-                        self.localsign = 0
-                        if self.Voices[i].perfs.SSIG.IPN.sign in s.keys():
-                            self.localsign = s[self.Voices[i].perfs.SSIG.IPN.sign]   
-                        self.localpitch = self.Voices[i].perfs.SSIG.IPN.pitch
-                        if self.Voices[i].perfs.SSIG.IPN.octave:
-                            mod = {"<":-1,"<<":-2,">":1,">>":2}
-                            if self.Voices[i].perfs.SSIG.IPN.octave in mod.keys():
-                                self.localoctave += mod[self.Voices[i].perfs.SSIG.IPN.octave]
-                            elif self.Voices[i].perfs.SSIG.IPN.octave in ["0","1","2","3","4","5","6","7","8","9"]:
-                                self.localoctave = int(self.Voices[i].perfs.SSIG.IPN.octave)
-
-                        scalenote = "C"
-                        scalesign = 0
-                        if self.Voices[i].perfs.SSIG.scalekey:
-                            scalenote = self.Voices[i].perfs.SSIG.scalekey.note
-                            if self.Voices[i].perfs.SSIG.scalekey.sign:
-                                scalesign = s[self.Voices[i].perfs.SSIG.scalekey.sign]  
-                        self.localscale = self.getGamme(scaleNote = scalenote, scaleSign = scalesign)
-
-                if self.Voices[i].perfs.BSIG:
-                    self.localBPM = int(self.Voices[i].perfs.BSIG.BPM)
-                    if self.Voices[i].perfs.BSIG.dynamic:
-                        self.localdynamicBPM = int(self.Voices[i].perfs.BSIG.dynamic)
-
+            #LOCAL PARAMS 
+            self.localPerfs = self.assignPerfs(self.Voices[i], self.localPerfs)
+            
             if self.Voices[i].name in voices.keys():
                 timecounter = voices[self.Voices[i].name]["endtracktime"]
             else:
                 voices[self.Voices[i].name]={}
                 timecounter = 0
                 channel = 0
-                time    = 0 # Eight beats into the composition
-                program = self.instrus[self.Voices[i].name]# instrumeeent
+                time    = 0
+                if self.Voices[i].name in self.instrus:
+                    instru = self.Voices[i].name
+                else :
+                    instru = "piano"
+                program = self.instrus[instru]# instrumeeent
                 self.midi.addProgramChange(i, channel, time, program)
   
             for line in self.Voices[i].lines :
@@ -152,7 +81,7 @@ class Midi_Parser(AMNFileParser):
                     for bar in line.content:
                         barpulses = 0
                         allnotes = []
-                        self.midi.addTempo(i, 0, self.localBPM)
+                        self.midi.addTempo(i, 0, self.localPerfs["BPM"])
                         timels = []
                         
                         #bar repetition + bar alt TODO
@@ -173,31 +102,36 @@ class Midi_Parser(AMNFileParser):
                                 duration = 1
                                 #note alterations
                                 # dynamic alteration ? to MIDI ? :(
-
-                                pitch = self.getMidiPitch(note.note, self.localoctave, self.localsign, self.localscale)
-                                if note.pitch :
-                                    char = note.pitch.alt[0]
-                                    shifts = {"+":1,
-                                              "-":-1,
-                                              ">":12,
-                                              "<":-12
-                                              }
-                                    if char in shifts.keys():
-                                        result = 0
-                                        coeff = shifts[char]
-                                        s= len(note.pitch.alt)
-
-                                        if len(note.pitch.strength) > 0:
-                                            s += int(note.pitch.strength[0])
-                                            if len(note.pitch.strength)==2:
-                                                if note.pitch.strength[1] == "%":
-                                                    s+= 0.5
-                                        pitch += int(coeff*s) # int ici car pas trouvé comment faire des quarts de tons (option ChangeTuning de la lib)
-
+                                if note.note in "A,B,C,D,E,F,G,@".split(","):
+                                    if note.note == "@":
+                                        pitch = -1
                                     else :
-                                        print(char+ " is not implemented yet at line %s"%line.fileLine)
+                                        pitch = self.getMidiPitch(note.note, self.localPerfs["octave"], self.localPerfs["sign"], self.localPerfs["scale"])
 
-                                #note repetition works
+                                        # Note alteration
+                                        if note.pitch :
+                                            char = note.pitch.alt[0]
+                                            shifts = {"+":1,
+                                                      "-":-1,
+                                                      ">":12,
+                                                      "<":-12
+                                                      }
+                                            if char in shifts.keys():
+                                                result = 0
+                                                coeff = shifts[char]
+                                                s= len(note.pitch.alt)
+
+                                                if len(note.pitch.strength) > 0:
+                                                    s += int(note.pitch.strength[0])
+                                                    if len(note.pitch.strength)==2:
+                                                        if note.pitch.strength[1] == "%":
+                                                            s+= 0.5
+                                                pitch += int(coeff*s) # int ici car pas trouvé comment faire des quarts de tons (option ChangeTuning de la lib)
+
+                                            else :
+                                                print(char+ " is not implemented yet at line %s"%line.fileLine)
+
+                                #note repetition 
                                 repetition = 1
                                 if note.noteRepetition :
                                     if note.repsuite:
@@ -223,13 +157,15 @@ class Midi_Parser(AMNFileParser):
                                 note["duration"]= note["duration"]/timelpulses
                                 barpulses+=note["duration"]
                             allnotes+=notes
+                            
                         for k in range(barrepetition):
                             for note in allnotes:
-                                self.midi.addNote(
-                                    i,0,note["pitch"],
-                                    timecounter,
-                                    note["duration"]/barpulses,
-                                    note["volume"])
+                                if note["pitch"] != -1 :
+                                    self.midi.addNote(
+                                        i,0,note["pitch"],
+                                        timecounter,
+                                        note["duration"]/barpulses,
+                                        note["volume"])
                                 timecounter += note["duration"]/barpulses
                             
                     if line.type == "split":
@@ -298,7 +234,7 @@ class Midi_Parser(AMNFileParser):
     def getGamme(self, scaleNote = "C", scaleSign = 0, customInt=None):
         intM = [2,2,1,2,2,2,1]
         intm = [2,1,2,2,1,3,1]
-                
+                    
         if customInt:
             intervalles = customInt
         elif scaleNote in ["A","B","C","D","E","F","G"]:
@@ -320,10 +256,42 @@ class Midi_Parser(AMNFileParser):
             gamme[pitch] = base
             i +=1
         return gamme
+    
+    def assignPerfs(self, this, outdico):
+        if this.perfs :
+            if this.perfs.SSIG:
+                if this.perfs.MPN:
+                    outdico["midiPitch"] = int(this.MPN)
+                elif this.perfs.SSIG.IPN:
+                    s = {"-" : -1,"+":1}
+                    outdico["sign"] = 0
+                    if this.perfs.SSIG.IPN.sign in s.keys():
+                        outdico["sign"] = s[this.SSIG.IPN.sign]
+                    outdico["pitch"] = this.perfs.SSIG.IPN.pitch
+                    if this.perfs.SSIG.IPN.octave:
+                        mod = {"<":-1,"<<":-2,">":1,">>":2}
+                        if this.perfs.SSIG.IPN.octave in mod.keys():
+                            outdico["octave"] += mod[this.perfs.SSIG.IPN.octave]
+                        elif this.perfs.SSIG.IPN.octave in ["0","1","2","3","4","5","6","7","8","9"]:
+                            outdico["octave"] = int(this.perfs.SSIG.IPN.octave)
 
-parsed = Midi_Parser(test)
-filename = "lol.midi"
+                    scalenote = "C"
+                    scalesign = 0
+                    if this.perfs.SSIG.scalekey:
+                        scalenote = this.perfs.SSIG.scalekey.note
+                        if this.perfs.SSIG.scalekey.sign:
+                            scalesign = s[this.perfs.SSIG.scalekey.sign]  
+                    outdico["scale"] = self.getGamme(scaleNote = scalenote, scaleSign = scalesign)
+                    
+            if this.perfs.BSIG:
+                outdico["BPM"] = int(this.perfs.BSIG.BPM)
+                if this.perfs.BSIG.dynamic:
+                    outdico["dynamicBPM"] = int(this.perfs.BSIG.dynamic)
+        return outdico
+        
+parsed = Midi_Parser("demos/frerejacques.amn")
+filename = "out.midi"
 os.system("stop "+filename)
 with open(filename, 'wb') as output_file:
     parsed.midi.writeFile(output_file)
-#os.system("start "+filename)
+os.system("start "+filename)
