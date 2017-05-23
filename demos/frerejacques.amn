@@ -1,10 +1,14 @@
 # title = "Frere Jacques"
 
-O global \$C6\%60
+#O global \$C6\%60
 
-O  sifflet  # bar-based notation
+O  sifflet   \$C5\%60 # bar-based notation
 |  CDEC/ * / EF G / * / G"A GF E C / * / C<G C  / *
 : EFGE/*/GA B/ * / B"C BA G E/*/ E<B E/* 
 
-O  flute \$C6 # add dynamics alteration
-|  [CDEC]* [EF G]* [!G"A GF E C]* ![C<G C  / C<G C0]
+O  violoncelle \$C4\%70 # add dynamics alteration
+|  EFGE/*/GA B/ * / B"C BA G E/*/ E<B E/*
+
+O  sifflet   \$C5\%60 # bar-based notation
+|  CDEC/ * / EF G / * / G"A GF E C / * / C<G C  / *
+: EFGE/*/GA B/ * / B"C BA G E/*/ E<B E/* 	

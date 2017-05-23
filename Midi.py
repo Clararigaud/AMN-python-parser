@@ -12,7 +12,7 @@ except ImportError:
 
 from AMN_Python_Parser import *
 import os
-
+import copy
 class Midi_Parser(AMNFileParser):
     def __init__(self,file):
         AMNFileParser.__init__(self,file)
@@ -49,31 +49,36 @@ class Midi_Parser(AMNFileParser):
             if self.Global.perfs:
                 self.globalPerfs = self.assignPerfs(self.Global, self.globalPerfs)
 
+        channel = -1
         for i in range(self.nbVoices):
-            self.localPerfs = self.globalPerfs
+            
+            self.localPerfs = copy.copy(self.globalPerfs)       
+            self.midi.addTrackName(i, 0, self.Voices[i].name)
             
             #LOCAL PARAMS 
             self.localPerfs = self.assignPerfs(self.Voices[i], self.localPerfs)
-            
+            print(self.localPerfs["BPM"])
             if self.Voices[i].name in voices.keys():
                 timecounter = voices[self.Voices[i].name]["endtracktime"]
             else:
                 voices[self.Voices[i].name]={}
                 timecounter = 0
-                channel = 0
-                time    = 0
+                
                 if self.Voices[i].name in self.instrus:
-                    instru = self.Voices[i].name
+                    voices[self.Voices[i].name]["instru"] = self.Voices[i].name
                 else :
-                    instru = "piano"
-                program = self.instrus[instru]# instrumeeent
-                self.midi.addProgramChange(i, channel, time, program)
-  
+                    voices[self.Voices[i].name]["instru"] = "piano"
+                channel +=1
+                voices[self.Voices[i].name]["channel"] = channel
+                self.midi.addProgramChange(i, voices[self.Voices[i].name]["channel"], 0, self.instrus[voices[self.Voices[i].name]["instru"]])
+                
+
+                
             for line in self.Voices[i].lines :
                 if line.type == "data":
                     pass #change local variables
 
-                elif line.type == "split" or "merge": 
+                elif line.type == "split" or "merge":
                     if line.type == "split":
                         lastsplitstarttime = timecounter
                     elif line.type == "merge":
@@ -81,7 +86,9 @@ class Midi_Parser(AMNFileParser):
                     for bar in line.content:
                         barpulses = 0
                         allnotes = []
-                        self.midi.addTempo(i, 0, self.localPerfs["BPM"])
+                        print("track",i)
+                        print("BPM",self.localPerfs["BPM"])
+                        self.midi.addTempo(i, timecounter, copy.copy(self.localPerfs["BPM"]))
                         timels = []
                         
                         #bar repetition + bar alt TODO
@@ -162,7 +169,7 @@ class Midi_Parser(AMNFileParser):
                             for note in allnotes:
                                 if note["pitch"] != -1 :
                                     self.midi.addNote(
-                                        i,0,note["pitch"],
+                                        i,voices[self.Voices[i].name]["channel"],note["pitch"],
                                         timecounter,
                                         note["duration"]/barpulses,
                                         note["volume"])
@@ -171,6 +178,7 @@ class Midi_Parser(AMNFileParser):
                     if line.type == "split":
                         lastsplitendtime = timecounter
                         voices[self.Voices[i].name]["endtracktime"] = lastsplitendtime
+
     @property
     def globalMidiPitch(self):
         return self.getMidiPitch(note=self.globalpitch,
@@ -288,10 +296,21 @@ class Midi_Parser(AMNFileParser):
                 if this.perfs.BSIG.dynamic:
                     outdico["dynamicBPM"] = int(this.perfs.BSIG.dynamic)
         return outdico
+    
+    def save(self):
+        if self.title:
+            title = self.title
+        else :
+            title = "out"
+        filename = title+".midi"
+        with open(filename, 'wb') as output_file:
+            self.midi.writeFile(output_file) 
+        print("saved as : "+filename)
+        return filename
         
-parsed = Midi_Parser("demos/frerejacques.amn")
-filename = "out.midi"
-os.system("stop "+filename)
-with open(filename, 'wb') as output_file:
-    parsed.midi.writeFile(output_file)
-os.system("start "+filename)
+    def play(self):
+        filename = self.save()
+        with open(filename, 'wb') as output_file:
+            self.midi.writeFile(output_file) 
+        os.system("start "+filename)
+Midi_Parser("demos/gamme.amn").play()
