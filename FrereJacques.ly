@@ -1,6 +1,6 @@
 \header {
-arranger="Christophe Schlick" 
 title="Frere Jacques" 
+arranger="Christophe Schlick" 
 meter = "60"
 }
 sifflet=\relative c'{\repeat percent2{ c4  d4  e4  c4 } \repeat percent2{ e4  f4  g2 } \repeat percent2{ g8.  a16  g8  f8  e4  c4 } \repeat percent2{ c4  g  c2 } } 

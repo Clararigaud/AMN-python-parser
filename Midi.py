@@ -57,7 +57,6 @@ class Midi_Parser(AMNFileParser):
             
             #LOCAL PARAMS 
             self.localPerfs = self.assignPerfs(self.Voices[i], self.localPerfs)
-            print(self.localPerfs["BPM"])
             if self.Voices[i].name in voices.keys():
                 timecounter = voices[self.Voices[i].name]["endtracktime"]
             else:
@@ -86,8 +85,6 @@ class Midi_Parser(AMNFileParser):
                     for bar in line.content:
                         barpulses = 0
                         allnotes = []
-                        print("track",i)
-                        print("BPM",self.localPerfs["BPM"])
                         self.midi.addTempo(i, timecounter, copy.copy(self.localPerfs["BPM"]))
                         timels = []
                         

@@ -212,7 +212,7 @@ class AMNtoLylipond(AMNFileParser):
         fichier = open(title+".ly", "w")
         fichier.write(self.file)
         fichier.close()
-        return title+".pdf"
+        return title
     def convert_perfs(self,ssig):
         clef=''
         relative=''
