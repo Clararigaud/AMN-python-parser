@@ -299,7 +299,7 @@ class Midi_Parser(AMNFileParser):
     
     def save(self):
         if self.title:
-            title = self.title
+            title = self.title.replace(" ", "")
         else :
             title = "out"
         filename = title+".midi"
@@ -313,4 +313,4 @@ class Midi_Parser(AMNFileParser):
         with open(filename, 'wb') as output_file:
             self.midi.writeFile(output_file) 
         os.system("start "+filename)
-Midi_Parser("demos/gamme.amn").play()
+

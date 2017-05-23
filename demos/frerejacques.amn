@@ -1,6 +1,7 @@
-# title = "Frere Jacques"
+# title = Frere Jacques
+# file author = Christophe Schlick
 
-#O global \$C6\%60
+O global \$C6\%60
 
 O  sifflet   \$C5\%60 # bar-based notation
 |  CDEC/ * / EF G / * / G"A GF E C / * / C<G C  / *
@@ -11,4 +12,4 @@ O  violoncelle \$C4\%70 # add dynamics alteration
 
 O  sifflet   \$C5\%60 # bar-based notation
 |  CDEC/ * / EF G / * / G"A GF E C / * / C<G C  / *
-: EFGE/*/GA B/ * / B"C BA G E/*/ E<B E/* 	
+: EFGE/*/GA B/ * / B"C BA G E/*/ E<B E/*
